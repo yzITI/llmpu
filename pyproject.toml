@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llmpu"
-version = "0.0.0"
+version = "0.0.1"
 description = "Large Language Model Process Unit"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
-authors = [{ name = "Phantomlsh" }]
+authors = [{ name = "yzITI" }, { name = "Phantomlsh" }]
 dependencies = [
     "google-genai>=2.8.0",
     "numpy>=2.4.6",
