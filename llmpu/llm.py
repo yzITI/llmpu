@@ -10,16 +10,13 @@ def gemini_request(prompt):
         from google import genai
         client = genai.Client(api_key=config["api_key"])
         types = genai.types
-    res = client.models.generate_content(
-        model=config["model"],
-        config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_level="medium"),
-            response_mime_type="application/json",
-            response_schema=types.Schema(type=types.Type.OBJECT, required=["python_code"], properties={ "python_code": types.Schema(type=types.Type.STRING) }),
-            **config["llm_config"]
-        ),
-        contents=prompt
-    )
+    _config = {
+        "thinking_config": types.ThinkingConfig(thinking_level="medium"),
+        "response_mime_type": "application/json",
+        "response_schema": types.Schema(type=types.Type.OBJECT, required=["python_code"], properties={ "python_code": types.Schema(type=types.Type.STRING) }),
+        **config["llm_config"]
+    }
+    res = client.models.generate_content(model=config["model"], config=types.GenerateContentConfig(**_config), contents=prompt)
     r = json.loads(res.text)
     return r["python_code"]
 

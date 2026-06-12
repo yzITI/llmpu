@@ -3,6 +3,8 @@ from .register import read, write
 from .executor import run
 from .llm import request
 
+clock = 0
+
 def init(_config={}):
     config.update(_config)
 
@@ -13,7 +15,14 @@ def read_registers(rs=range(config["VR"])):
         res += read(r) + "\n\n"
     return res
 
+def log(c):
+    print(f"--- clock: {clock} ---")
+    print(c)
+
 def cycle():
     code = request(read_registers())
+    log(code)
     run(code)
+    global clock
+    clock += 1
 
