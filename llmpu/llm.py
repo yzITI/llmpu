@@ -4,9 +4,9 @@ from .config import config
 client = None
 
 def gemini_request(prompt):
+    global client
     if client is None:
         from google import genai
-        global client
         client = genai.Client(api_key=config["api_key"])
     res = client.models.generate_content(
         model=config["model"],
