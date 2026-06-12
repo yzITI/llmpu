@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llmpu"
+version = "0.1.0"
+description = "Large Language Model Process Unit"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [{ name = "llmpu contributors" }]
+
+[tool.setuptools.packages.find]
+include = ["llmpu*"]
