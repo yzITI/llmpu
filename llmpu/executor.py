@@ -1,7 +1,10 @@
+from .register import read, write
 from .config import config
 
 def call(r):
-    return "this is call"
+    content = read(r)
+    run(content)
 
 def run(code):
-    return "This is run"
+    env = { "READ": read, "WRITE": write, "CALL": call }
+    exec(code, env, env)
