@@ -7,9 +7,13 @@ name = "llmpu"
 version = "0.1.0"
 description = "Large Language Model Process Unit"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "llmpu contributors" }]
+dependencies = [
+    "google-genai>=2.8.0",
+    "numpy>=2.4.6",
+]
 
 [tool.setuptools.packages.find]
 include = ["llmpu*"]
