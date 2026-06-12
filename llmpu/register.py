@@ -1,7 +1,11 @@
 from .config import config
 
+data = {}
+
 def read(r):
-    return "this is read"
+    return data.get(r, "")
 
 def write(r, content):
-    return "this is write"
+    _content = content[:config["L"]]
+    data[r] = _content
+    return _content
