@@ -1,6 +1,6 @@
 from .config import config
 from .register import read
-from .executor import call
+from .executor import run
 from .llm import request
 
 def init(_config={}):
@@ -15,5 +15,5 @@ def read_registers(rs=range(config["VR"])):
 
 def cycle():
     code = request(read_registers())
-    call(code)
+    run(code)
 
