@@ -2,6 +2,8 @@
 
 Large Language Model Process Unit
 
+Imagine a process unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompts. Instead, the contents of the first few registers are presented to the LLM. Through generating code, the process unit will be able to read, write, and execute code from any register. Then the process unit can be used as a general computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
+
 ## Get Started
 
 ```
