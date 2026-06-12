@@ -18,6 +18,7 @@ def read_registers(rs=range(config["VR"])):
 def log(c):
     print(f"--- clock: {clock} ---")
     print(c)
+    print(f"--- end of instructions ---\n")
 
 def cycle():
     code = request(read_registers())
