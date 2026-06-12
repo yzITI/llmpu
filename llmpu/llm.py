@@ -13,7 +13,7 @@ def gemini_request(prompt):
     res = client.models.generate_content(
         model=config["model"],
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_level="low"),
+            thinking_config=types.ThinkingConfig(thinking_level="medium"),
             response_mime_type="application/json",
             response_schema=types.Schema(type=types.Type.OBJECT, required=["python_code"], properties={ "python_code": types.Schema(type=types.Type.STRING) }),
             **config["llm_config"]
