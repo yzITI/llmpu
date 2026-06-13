@@ -4,4 +4,5 @@ config = {
     "model": "gemini-3.5-flash", # llm model
     "api_key": "", # llm api key
     "llm_config": {}, # llm config
+    "log_path": "llmpu.log", # log file path
 }

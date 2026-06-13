@@ -4,6 +4,13 @@ Large Language Model Process Unit
 
 Imagine a process unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompts. Instead, the contents of the first few registers are presented to the LLM. Through generating code, the process unit will be able to read, write, and execute code from any register. Then the process unit can be used as a general computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
 
+Following instruction set is provided for the process unit as Python functions:
+- `READ(r)` returns content in register number `r`
+- `WRITE(r, content)` store string `content` in register number `r`
+- `CALL(r)` execute the content in register number `r` as Python code
+
+And their description is not hard coded, but stored in register 0, for example, as a "firmware".
+
 ## Get Started
 
 ```
@@ -18,18 +25,20 @@ llmpu.init({
     # "model": "gemini-3.5-flash", # llm model
     "api_key": "your llm api key", # llm api key
     # "llm_config": {}, # llm config
+    # "log_path": "llmpu.log", # log path
 })
 ```
 
-Helper functions:
+Instruction set functions:
 
 ```python
+# use register 100 as an example
 llmpu.write(100, "print('hello')") # truncate if exceed config["L"]
 llmpu.read(100) # "print('hello')"
 llmpu.call(100) # execute code in register 100
 ```
 
-Main cycle:
+Main clock cycle:
 
 ```python
 llmpu.cycle()

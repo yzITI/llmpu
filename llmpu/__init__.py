@@ -16,9 +16,11 @@ def read_registers(rs=range(config["VR"])):
     return res
 
 def log(c):
-    print(f"--- clock: {clock} ---")
-    print(c)
-    print(f"--- end of instructions ---\n")
+    if not config["log_path"]:
+        return
+    with open(config["log_path"], "a") as f:
+        f.write(f"--- clock: {clock} ---\n")
+        f.write(c + "\n")
 
 def cycle():
     code = request(read_registers())
