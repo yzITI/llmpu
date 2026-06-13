@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llmpu"
-version = "0.0.2"
-description = "Large Language Model Process Unit"
+version = "0.0.3"
+description = "Large Language Model Processing Unit"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -14,6 +14,10 @@ dependencies = [
     "google-genai>=2.8.0",
     "numpy>=2.4.6",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yzITI/llmpu"
+Repository = "https://github.com/yzITI/llmpu"
 
 [tool.setuptools.packages.find]
 include = ["llmpu*"]

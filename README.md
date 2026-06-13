@@ -1,10 +1,10 @@
 # LLMPU
 
-Large Language Model Process Unit
+Large Language Model Processing Unit
 
-Imagine a process unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompts. Instead, the contents of the first few registers are presented to the LLM. Through generating code, the process unit will be able to read, write, and execute code from any register. Then the process unit can be used as a general computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
+Imagine a processing unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompts. Instead, the contents of the first few registers are presented to the LLM. Through generating code, the processing unit will be able to read, write, and execute code from any register. Then the processing unit can be used as a general computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
 
-Following instruction set is provided for the process unit as Python functions:
+Following instruction set is provided for the processing unit as Python functions:
 - `READ(r)` returns content in register number `r`
 - `WRITE(r, content)` store string `content` in register number `r`
 - `CALL(r)` execute the content in register number `r` as Python code
@@ -50,7 +50,7 @@ llmpu.cycle()
 ```python
 # using default config
 firmware = """
-You are a process unit with many registers (this is register 0, or r0) with string values. Each register can store up to 5000 characters. Registers 0-15 (r0 to r15) are visible to you, and other registers are available but not presented to you. You can operate on registers using the following functions:
+You are a processing unit with many registers (this is register 0, or r0) with string values. Each register can store up to 5000 characters. Registers 0-15 (r0 to r15) are visible to you, and other registers are available but not presented to you. You can operate on registers using the following functions:
 - `READ(r)` returns content in register number `r`
 - `WRITE(r, content)` store string `content` in register number `r`. The content will be truncated to 5000 characters maximum.
 - `CALL(r)` execute the content in register number `r` as Python code.
