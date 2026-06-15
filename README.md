@@ -2,9 +2,9 @@
 
 Large Language Model Processing Unit
 
-Imagine a processing unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompts. Instead, the contents of the first few registers are presented to the LLM. Through generating code, the processing unit will be able to read, write, and execute code from any register. Then the processing unit can be used as a general computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
+Imagine a processing unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompt. Instead, the contents of the first several registers are presented to the LLM. By generating code, the processing unit will be able to read, write, and execute code from any register. Then the processing unit can be used as a general intelligent computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
 
-Following instruction set is provided for the processing unit as Python functions:
+The following instruction set is provided to the processing unit as Python functions:
 - `READ(r)` returns content in register number `r`
 - `WRITE(r, content)` store string `content` in register number `r`
 - `CALL(r)` execute the content in register number `r` as Python code
