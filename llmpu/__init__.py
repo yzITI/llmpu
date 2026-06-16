@@ -1,5 +1,5 @@
 from .config import config
-from .register import read, write
+from .register import read, write, dump, load
 from .executor import run
 from .llm import request
 

@@ -1,13 +1,32 @@
+import json, base64, hashlib
 from .config import config
 
-data = {}
+registers = {} # index -> hash
+contents = {} # hash -> content
+
+sha256 = lambda s: base64.b64encode(hashlib.sha256(s.encode('utf-8')).digest()).decode('utf-8')
 
 def read(r):
-    return data.get(r, "")
+    return contents.get(registers.get(r, ""), "")
 
 def write(r, content):
+    if not content:
+        registers.pop(r, None)
+        return content
     _content = content[:config["L"]]
-    data[r] = _content
-    if not _content:
-        del data[r]
+    hash = sha256(_content)
+    contents[hash] = _content
+    registers[r] = hash
     return _content
+
+def dump(path="dump.json"):
+    for hash in list(contents.keys()):
+        if hash not in registers.values():
+            contents.pop(hash, None)
+    json.dump({ "registers": registers, "contents": contents }, open(path, "w"))
+
+def load(path="dump.json"):
+    global registers, contents
+    raw = json.load(open(path, "r"))
+    registers = raw.get("registers", {})
+    contents = raw.get("contents", {})
