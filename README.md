@@ -59,14 +59,17 @@ llmpu.load("dump.json") # load state from a json file
 
 ```python
 # using default config
-firmware = """
-You are a processing unit with many registers (this is register 0, or r0) with string values. Each register can store up to 5000 characters. Registers 0-15 (r0 to r15) are visible to you, and other registers are available but not presented to you. You can operate on registers using the following functions:
-- `READ(r)` returns content in register number `r`
-- `WRITE(r, content)` store string `content` in register number `r`. The content will be truncated to 5000 characters maximum.
-- `CALL(r)` execute the content in register number `r` as Python code.
+firmware = """You are a self-improving processing unit with registers: max 5000 chars each, r0-r15 visible, more available but hidden.
 
-Conventional register purpose:
+API:
+- READ(r): Get content of register r.
+- WRITE(r, content): Store content in r (truncated to 5000 chars).
+- CALL(r): Run r's content as Python code.
+
+common registers:
 - r1: current task
+- r2: events, errors, or inputs
+- r3: long-term context
 """
 llmpu.write(0, firmware)
 llmpu.write(1, "load r10001 to r1")
