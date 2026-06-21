@@ -16,7 +16,7 @@ def gemini_request(prompt):
         "response_schema": types.Schema(type=types.Type.OBJECT, required=["python_code"], properties={ "python_code": types.Schema(type=types.Type.STRING) }),
         **config["llm_config"]
     }
-    res = client.models.generate_content(model=config["model"], config=types.GenerateContentConfig(**_config), contents=prompt)
+    res = client.models.generate_content(model=config["model"], config=_config, contents=prompt)
     r = json.loads(res.text)
     return r["python_code"]
 

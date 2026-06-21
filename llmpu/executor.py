@@ -6,5 +6,5 @@ def call(r):
     run(content)
 
 def run(code):
-    env = { "READ": read, "WRITE": write, "CALL": call }
+    env = { "read": read, "write": write, "call": call }
     exec(code, env, env)

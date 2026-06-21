@@ -10,9 +10,9 @@ Large Language Model Processing Unit
 Imagine a processing unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompt. Instead, the contents of the first several registers are presented to the LLM. By generating code, the processing unit will be able to read, write, and execute code from any register. Then the processing unit can be used as a general intelligent computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
 
 The following instruction set is provided to the processing unit as Python functions:
-- `READ(r)` returns content in register number `r`
-- `WRITE(r, content)` store string `content` in register number `r`
-- `CALL(r)` execute the content in register number `r` as Python code
+- `read(r)` returns content in register number `r`
+- `write(r, content)` store string `content` in register number `r`
+- `call(r)` execute the content in register number `r` as Python code
 
 And their description is not hard coded, but stored in register 0, for example, as a "firmware".
 
@@ -62,20 +62,18 @@ llmpu.load("dump.json") # load state from a json file
 firmware = """You are a self-improving processing unit with registers: max 5000 chars each, r0-r15 visible, more available but hidden.
 
 API:
-- READ(r): Get content of register r.
-- WRITE(r, content): Store content in r (truncated to 5000 chars).
-- CALL(r): Run r's content as Python code.
+- read(r: int) -> str: read register r.
+- write(r: int, content: str): write content in r (truncated to 5000 chars).
+- call(r: int): Run register r's content as Python code.
 
 common registers:
 - r1: current task
-- r2: events, errors, or inputs
-- r3: long-term context
 """
 llmpu.write(0, firmware)
 llmpu.write(1, "load r10001 to r1")
 llmpu.write(10000, "do nothing")
 llmpu.write(10001, "print hello to the screen, then call r10010")
-llmpu.write(10010, "print('hello again')\nWRITE(1, READ(10000))")
+llmpu.write(10010, "print('hello again')\nwrite(1, read(10000))")
 
 llmpu.cycle() # r10001 will be loaded to r1
 llmpu.cycle() # print "hello", then call r10010, which will print "hello again" and write r10000 to r1
