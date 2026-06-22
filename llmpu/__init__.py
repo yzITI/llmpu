@@ -1,12 +1,15 @@
 from .config import config
 from .register import read, write, dump, load
-from .executor import run
+from .executor import run, call
 from .llm import request
 
 clock = 0
 
 def init(_config={}):
     config.update(_config)
+
+# complete default initialization by providing execution environment
+init({ "EXEC": { "read": read, "write": write, "call": call } })
 
 def read_registers(rs=range(config["VR"])):
     res = ""

@@ -24,13 +24,16 @@ pip install llmpu
 
 ```python
 import llmpu
-llmpu.init({
-    # "VR": 16, # visibile register number
-    # "L": 10000, # hard character number limit for register
-    # "model": "gemini-3.5-flash", # llm model
-    "api_key": "your llm api key", # llm api key
-    # "llm_config": {}, # llm config
-    # "log_path": "llmpu.log", # log path
+llmpu.init({ # default config here
+    "api_key": "", # llm api key
+    "VR": 16, # visibile register number
+    "L": 10000, # hard character number limit for register
+    "model": "gemini-3.5-flash", # llm model
+    "llm_config": {}, # llm config
+    "log_path": "llmpu.log", # log path
+    "EXEC": { # provided to execution environment, can be used by llm
+        "read": llmpu.read, "write": llmpu.write, "call": llmpu.call
+    }
 })
 ```
 

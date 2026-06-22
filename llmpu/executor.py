@@ -5,5 +5,4 @@ def call(r):
     run(read(r))
 
 def run(code):
-    env = { "read": read, "write": write, "call": call }
-    exec(code, env, env)
+    exec(code, config["EXEC"], config["EXEC"])
