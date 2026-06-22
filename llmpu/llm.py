@@ -21,4 +21,6 @@ def gemini_request(prompt):
     return r["python_code"]
 
 def request(prompt):
-    return gemini_request(prompt)
+    if config["model"].startswith("gemini-"):
+        return gemini_request(prompt)
+    raise ValueError(f"Unsupported model: {config['model']}")
