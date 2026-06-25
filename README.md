@@ -50,8 +50,8 @@ Control functions:
 
 ```python
 # main clock cycle
-# present visible registers to LLM, then execute the generated code.
-llmpu.cycle()
+# present visible registers to LLM, then run the generated code.
+llmpu.cycle(debug=False) # debug: disable code run
 
 # core dump
 llmpu.dump("dump.json") # dump state to a json file

@@ -3,7 +3,7 @@ from .register import read, write, dump, load
 from .executor import run, call
 from .llm import request
 
-clock = 0
+clock = -1
 
 def init(_config={}):
     config.update(_config)
@@ -23,10 +23,12 @@ def log(c):
     with open(config["log_path"], "a") as f:
         f.write(f"--- clock: {clock} ---\n{c}\n")
 
-def cycle():
-    code = request(read_registers())
-    log(code)
-    run(code)
+def cycle(debug=False):
     global clock
     clock += 1
+    code = request(read_registers())
+    log(code)
+    if not debug:
+        run(code)
+    return code
 
