@@ -2,6 +2,7 @@ from .config import config
 from .register import read, write, dump, load
 from .executor import run, call
 from .llm import request
+from .srpc import srpc
 
 clock = -1
 
@@ -31,4 +32,3 @@ def cycle(debug=False):
     if not debug:
         run(code)
     return code
-
