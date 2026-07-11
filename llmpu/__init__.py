@@ -2,6 +2,7 @@ from .config import config
 from .register import read, write, dump, load
 from .executor import run, call
 from .llm import request
+from .srpc import srpc
 
 clock = -1
 
@@ -31,3 +32,15 @@ def cycle(debug=False):
     if not debug:
         run(code)
     return code
+
+def serve(port=22222):
+    srpc(port=port)
+    print(f"SRPC server is listening localhost:{port}")
+    srpc["read"] = read
+    srpc["write"] = write
+    srpc["dump"] = dump
+    srpc["load"] = load
+    srpc["call"] = call
+    srpc["run"] = run
+    srpc["cycle"] = cycle
+
