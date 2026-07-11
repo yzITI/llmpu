@@ -30,7 +30,7 @@ llmpu.init({ # default config here
     "L": 10000, # hard character number limit for register
     "model": "gemini-3.5-flash", # llm model
     "llm_config": {}, # llm config
-    "log_path": "llmpu.log", # log path
+    "log_path": "", # log path
     "EXEC": { # provided to execution environment, can be used by llm
         "read": llmpu.read, "write": llmpu.write, "call": llmpu.call
     }

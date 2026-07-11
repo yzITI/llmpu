@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llmpu"
-version = "0.0.7"
+version = "0.0.8"
 description = "Large Language Model Processing Unit"
 readme = "README.md"
 requires-python = ">=3.11"
