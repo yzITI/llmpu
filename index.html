@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLMPU</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans antialiased h-screen flex flex-col relative">
+
+  <header class="bg-blue-500 text-white px-6 py-3 flex items-center justify-between shadow-md">
+    <div class="flex items-center space-x-3">
+      <span class="mdi mdi-memory text-white text-3xl"></span>
+      <h1 class="text-xl font-bold tracking-wide">LLMPU</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <label for="port-input" class="text-sm text-blue-100 font-bold">Port:</label>
+      <input type="number" id="port-input" value="22222" class="font-mono bg-blue-700 pl-2 py-1 rounded w-20 outline-none text-white transition-opacity duration-200">
+    </div>
+  </header>
+
+  <div class="flex-1 flex overflow-hidden">
+    <section class="w-1/2 p-6 flex flex-col border-r border-gray-200 bg-white">
+      <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+        <h2 class="text-lg font-semibold flex items-center gap-2 flex-1">
+          <span class="mdi mdi-database text-gray-500"></span> Registers
+        </h2>
+        <div class="relative w-28">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-2 font-mono text-gray-500 font-bold">r</span>
+          <input type="number" id="reg-lookup-num" placeholder="#" class="w-full pl-5 py-1.5 border border-gray-300 rounded font-mono text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm transition-opacity duration-200">
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto pr-2" id="monitored-regs-list"></div>
+    </section>
+
+    <section class="w-1/2 p-6 flex flex-col bg-gray-50 gap-4 overflow-y-auto">
+      <div class="w-full flex flex-col gap-1">
+        <div id="loading-status-text" class="text-xs font-semibold text-blue-600 uppercase tracking-wider invisible flex items-center gap-1.5">
+          <span class="mdi mdi-loading mdi-spin text-sm"></span> Processing ...
+        </div>
+      </div>
+      <div class="flex justify-between text-lg font-medium">
+        <div class="flex gap-2">
+          <button id="btn-cycle" class="cursor-pointer w-36 flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-2 rounded flex items-center justify-center gap-1.5 transition shadow-sm">
+            <span class="mdi mdi-refresh text-base"></span> Cycle
+          </button>
+          <button id="btn-run-custom" class="cursor-pointer w-36 flex-1 bg-gray-800 hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 rounded flex items-center justify-center gap-1.5 transition shadow-sm">
+            <span class="mdi mdi-play text-base"></span> Run
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-load" class="cursor-pointer w-36 flex-1 border border-gray-300 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-700 py-2 rounded flex items-center justify-center gap-1.5 transition shadow-sm">
+            <span class="mdi mdi-upload text-base"></span> Load
+          </button>
+          <button id="btn-dump" class="cursor-pointer w-36 flex-1 border border-gray-300 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-700 py-2 rounded flex items-center justify-center gap-1.5 transition shadow-sm">
+            <span class="mdi mdi-download text-base"></span> Dump
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 flex flex-col bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+        <textarea id="code-buffer" class="flex-1 p-4 font-mono text-sm bg-gray-900 text-gray-100 outline-none resize-none leading-relaxed disabled:opacity-80" placeholder="# instructions"></textarea>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    let loading = false
+    const cachedRegValues = {}
+
+    window.srpc = (N, A) => fetch(`http://localhost:${$('#port-input').val()}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ N, A })
+    }).then(r => r.json()).then(r => r.R).catch(err => undefined)
+    window.llmpu = {
+      write: (r, content) => srpc(['write'], [r, content]),
+      read: r => srpc(['read'], [r]),
+      call: r => srpc(['call'], [r]),
+      cycle: (debug = true) => srpc(['cycle'], [debug]),
+      dump: path => srpc(['dump'], [path]),
+      load: path => srpc(['load'], [path]),
+      run: code => srpc(['run'], [code])
+    }
+
+    $(document).ready(function () {
+      const monitoredRegs = new Set([])
+      const collapsedRegs = new Set([])
+      async function executeAction (callback) {
+        if (loading) return
+        loading = true
+        $('button, input, textarea').prop('disabled', true).addClass('opacity-60')
+        $('#loading-status-text').removeClass('invisible')
+        try {
+          await callback()
+        } catch (error) {
+          console.error(error)
+        } finally {
+          $('button, input, textarea').prop('disabled', false).removeClass('opacity-60')
+          $('#loading-status-text').addClass('invisible')
+          loading = false
+        }
+      }
+
+      function renderMonitoredList () {
+        const $list = $('#monitored-regs-list')
+        $list.empty()
+        if (monitoredRegs.size === 0) {
+          $list.append(`
+            <div class="p-6 text-center text-gray-400 text-sm italic">
+              No registers monitored. Enter a number to add.
+            </div>
+          `)
+          return
+        }
+        const sortedNums = Array.from(monitoredRegs).sort((a, b) => parseInt(a) - parseInt(b))
+        for (const num of sortedNums) {
+          const currentVal = cachedRegValues[num] !== undefined ? cachedRegValues[num] : ''
+          const isCollapsed = collapsedRegs.has(num.toString())
+          const rowHtml = `
+            <div class="flex flex-col gap-1.5 group" data-num="${num}">
+              <div class="flex items-center px-1">
+                <button class="btn-toggle-reg text-gray-500 hover:text-blue-500 p-1 rounded cursor-pointer flex items-center justify-center" title="${isCollapsed ? 'Expand' : 'Collapse'}">
+                  <span class="mdi ${isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-down'} text-xl"></span>
+                </button>
+                <span class="font-mono bg-blue-100 mr-2 px-2 py-0.5 rounded text-sm text-blue-800 font-bold shadow-sm">r${num}</span>
+                <button class="btn-save-reg cursor-pointer text-gray-500 hover:text-blue-500 p-1.5 rounded transition" title="Save">
+                  <span class="mdi mdi-content-save"></span>
+                </button>
+                <button class="btn-remove-reg cursor-pointer text-gray-500 hover:text-red-600 p-1.5 rounded transition" title="Remove">
+                  <span class="mdi mdi-close"></span>
+                </button>
+              </div>
+              <textarea class="w-full p-2.5 mb-2 border border-gray-300 rounded font-mono text-sm bg-gray-50 shadow-sm reg-value-field ${isCollapsed ? 'hidden' : ''}" rows="4" placeholder="(blank)">${currentVal}</textarea>
+            </div>
+          `
+          $list.append(rowHtml)
+        }
+      }
+
+      async function refreshAllMonitoredRegisters() {
+        if (monitoredRegs.size === 0) return
+        const targets = Array.from(monitoredRegs)
+        const results = await Promise.all(targets.map(num => llmpu.read(num)))
+        targets.forEach((num, index) => { cachedRegValues[num] = results[index] !== undefined ? results[index] : '' })
+        renderMonitoredList();
+      }
+
+      $('#reg-lookup-num').on('keyup', function (e) {
+        if (e.key !== 'Enter' || loading) return;
+        const numInput = $(this).val().trim();
+        if (!numInput) return;
+        const targetNum = Number(numInput);
+        $(this).val('');
+        if (monitoredRegs.has(targetNum)) return
+        monitoredRegs.add(targetNum);
+        executeAction(async () => {
+          const val = await llmpu.read(targetNum)
+          cachedRegValues[targetNum] = val !== undefined ? val : ''
+          renderMonitoredList()
+        })
+      })
+
+      $('#monitored-regs-list').on('click', '.btn-toggle-reg', function () {
+        const $parent = $(this).closest('[data-num]')
+        const num = $parent.data('num').toString()
+        const $textarea = $parent.find('.reg-value-field')
+        const $icon = $(this).find('.mdi')
+
+        if (collapsedRegs.has(num)) {
+          collapsedRegs.delete(num)
+          $textarea.removeClass('hidden')
+          $icon.removeClass('mdi-chevron-right').addClass('mdi-chevron-down')
+          $(this).attr('title', 'Collapse')
+        } else {
+          collapsedRegs.add(num)
+          $textarea.addClass('hidden')
+          $icon.removeClass('mdi-chevron-down').addClass('mdi-chevron-right')
+          $(this).attr('title', 'Expand')
+        }
+      })
+
+      $('#monitored-regs-list').on('input', '.reg-value-field', function() {
+        const num = $(this).closest('[data-num]').data('num')
+        cachedRegValues[num] = $(this).val()
+      })
+
+      $('#monitored-regs-list').on('click', '.btn-save-reg', function () {
+        if (loading) return;
+        const $parent = $(this).closest('[data-num]')
+        const num = $parent.data('num')
+        const newVal = $parent.find('.reg-value-field').val()
+        executeAction(async () => { 
+          await llmpu.write(num, newVal);
+          cachedRegValues[num] = newVal;
+        })
+      })
+
+      $('#monitored-regs-list').on('click', '.btn-remove-reg', function () {
+        const num = $(this).closest('[data-num]').data('num').toString()
+        monitoredRegs.delete(Number(num))
+        delete cachedRegValues[Number(num)]
+        collapsedRegs.delete(num)
+        renderMonitoredList()
+      })
+
+      $('#btn-cycle').on('click', function () {
+        executeAction(async () => {
+          const codeResult = await llmpu.cycle(true)
+          $('#code-buffer').val(codeResult)
+        })
+      })
+
+      $('#btn-run-custom').on('click', function () {
+        const currentCode = $('#code-buffer').val()
+        if (!currentCode.trim()) return
+        executeAction(async () => {
+          await llmpu.run(currentCode)
+          await refreshAllMonitoredRegisters()
+        })
+      })
+
+      $('#btn-dump').on('click', function () {
+        Swal.fire({
+          title: 'Dump State',
+          input: 'text',
+          inputLabel: 'Path',
+          inputValue: 'dump.json',
+          showCancelButton: true,
+          confirmButtonColor: '#3b82f6',
+          confirmButtonText: 'Dump'
+        }).then(result => {
+          if (!result.isConfirmed || !result.value) return
+          executeAction(async () => { await llmpu.dump(result.value) })
+        })
+      })
+
+      $('#btn-load').on('click', function () {
+        Swal.fire({
+          title: 'Load State',
+          input: 'text',
+          inputLabel: 'Path',
+          inputValue: 'dump.json',
+          showCancelButton: true,
+          confirmButtonColor: '#3b82f6',
+          confirmButtonText: 'Load'
+        }).then((result) => {
+          if (!result.isConfirmed || !result.value) return
+          executeAction(async () => {
+            await llmpu.load(result.value)
+            await refreshAllMonitoredRegisters()
+          })
+        })
+      })
+
+      renderMonitoredList()
+    })
+  </script>
+</body>
+</html>
+
