@@ -58,12 +58,12 @@ llmpu.dump("dump.json") # dump state to a json file
 llmpu.load("dump.json") # load state from a json file
 ```
 
-Server:
+Server and UI:
 
-> Network server uses [srpc](https://github.com/yzITI/srpc) protocol. It only allows localhost traffic security reason. **Exposing the interface allows arbitrary code execution!**
+> Network server uses [srpc](https://github.com/yzITI/srpc) protocol. It only allows localhost traffic for security reason. **Exposing the interface allows arbitrary code execution!**
 
 ```python
-llmpu.serve(port=22222)
+llmpu.serve(port=22222, browser=True)
 ```
 
 ## Minimum Example

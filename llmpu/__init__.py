@@ -33,7 +33,7 @@ def cycle(debug=False):
         run(code)
     return code
 
-def serve(port=22222):
+def serve(port=22222, browser=True):
     srpc(port=port)
     print(f"SRPC server is listening localhost:{port}")
     srpc["read"] = read
@@ -43,4 +43,6 @@ def serve(port=22222):
     srpc["call"] = call
     srpc["run"] = run
     srpc["cycle"] = cycle
-
+    if browser:
+        import webbrowser
+        webbrowser.open("https://yzITI.github.io/llmpu/")
