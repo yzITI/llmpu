@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-      <div class="flex-1 overflow-y-auto pr-2" id="monitored-regs-list"></div>
+      <div class="flex-1 overflow-y-auto pr-2" id="regs-list"></div>
     </section>
 
     <section class="w-1/2 p-6 flex flex-col bg-gray-50 gap-4 overflow-y-auto">
@@ -110,15 +110,15 @@
         }
       }
 
-      function renderMonitoredList () {
-        const $list = $('#monitored-regs-list')
+      function renderList () {
+        const $list = $('#regs-list')
         $list.empty()
 
         const regKeys = Object.keys(registers)
         if (regKeys.length === 0) {
           $list.append(`
             <div class="p-6 text-center text-gray-400 text-sm italic">
-              No registers found or monitored.
+              No registers.
             </div>
           `)
           return
@@ -153,7 +153,7 @@
         Object.keys(allRegisters).forEach(key => {
           registers[Number(key)] = allRegisters[key]
         })
-        renderMonitoredList()
+        renderList()
       }
 
       function saveRegister($container) {
@@ -174,11 +174,11 @@
         $(this).val('')
         if (registers[targetNum] === undefined) {
           registers[targetNum] = ''
-          renderMonitoredList()
+          renderList()
         }
       })
 
-      $('#monitored-regs-list').on('click', '.btn-toggle-reg', function () {
+      $('#regs-list').on('click', '.btn-toggle-reg', function () {
         const $parent = $(this).closest('[data-num]')
         const num = $parent.data('num').toString()
         const $textarea = $parent.find('.reg-value-field')
@@ -197,22 +197,23 @@
         }
       })
 
-      $('#monitored-regs-list').on('input', '.reg-value-field', function() {
+      $('#regs-list').on('input', '.reg-value-field', function() {
         const num = $(this).closest('[data-num]').data('num')
         registers[num] = $(this).val()
       })
 
-      $('#monitored-regs-list').on('click', '.btn-save-reg', function () {
+      $('#regs-list').on('click', '.btn-save-reg', function () {
         saveRegister($(this).closest('[data-num]'))
       })
 
-      $('#monitored-regs-list').on('keydown', '.reg-value-field', function (e) {
+      $('#regs-list').on('keydown', '.reg-value-field', function (e) {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
           e.preventDefault()
           saveRegister($(this).closest('[data-num]'))
         }
       })
 
+      // Shortcut: Shift + Enter on Code Buffer Textarea to Run
       $('#code-buffer').on('keydown', function (e) {
         if (e.shiftKey && e.key === 'Enter') {
           e.preventDefault()
