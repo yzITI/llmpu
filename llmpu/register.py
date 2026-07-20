@@ -9,6 +9,9 @@ sha256 = lambda s: base64.b64encode(hashlib.sha256(s.encode('utf-8')).digest()).
 def read(r):
     return contents.get(registers.get(r, ""), "")
 
+def read_all():
+    return { r: read(r) for r in registers }
+
 def write(r, content):
     if not content:
         registers.pop(r, None)
@@ -19,10 +22,13 @@ def write(r, content):
     registers[r] = hash
     return _content
 
-def dump(path="dump.json"):
+def clean(): # clean unused contents
     for hash in list(contents.keys()):
         if hash not in registers.values():
             contents.pop(hash, None)
+
+def dump(path="dump.json"):
+    clean()
     json.dump({ "registers": registers, "contents": contents }, open(path, "w"))
 
 def load(path="dump.json"):

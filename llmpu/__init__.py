@@ -1,5 +1,5 @@
 from .config import config
-from .register import read, write, dump, load
+from .register import read, read_all, write, dump, load
 from .executor import run, call
 from .llm import request
 from .srpc import srpc
@@ -37,6 +37,7 @@ def serve(port=22222, browser=True):
     srpc(port=port)
     print(f"SRPC server is listening localhost:{port}")
     srpc["read"] = read
+    srpc["read_all"] = read_all
     srpc["write"] = write
     srpc["dump"] = dump
     srpc["load"] = load
