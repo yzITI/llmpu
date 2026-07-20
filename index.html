@@ -28,9 +28,14 @@
         <h2 class="text-lg font-semibold flex items-center gap-2 flex-1">
           <span class="mdi mdi-database text-gray-500"></span> Registers
         </h2>
-        <div class="relative w-28">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-2 font-mono text-gray-500 font-bold">r</span>
-          <input type="number" id="reg-lookup-num" placeholder="#" class="w-full pl-5 py-1.5 border border-gray-300 rounded font-mono text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm transition-opacity duration-200">
+        <div class="flex items-center gap-2">
+          <button id="btn-refresh-all" class="cursor-pointer text-gray-600 hover:text-blue-500 p-1.5 rounded transition flex items-center gap-1 text-sm" title="Refresh">
+            <span class="mdi mdi-refresh"></span>
+          </button>
+          <div class="relative w-28">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-2 font-mono text-gray-500 font-bold">Add r</span>
+            <input type="number" id="reg-lookup-num" placeholder="#" class="w-full pl-14 py-1.5 border border-gray-300 rounded font-mono text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm transition-opacity duration-200">
+          </div>
         </div>
       </div>
       <div class="flex-1 overflow-y-auto pr-2" id="monitored-regs-list"></div>
@@ -70,14 +75,15 @@
 
   <script>
     let loading = false
-    const cachedRegValues = {}
+    const registers = {}
 
     window.srpc = (N, A) => fetch(`http://localhost:${$('#port-input').val()}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ N, A })
     }).then(r => r.json()).then(r => r.R).catch(err => undefined)
+    
     window.llmpu = {
       write: (r, content) => srpc(['write'], [r, content]),
-      read: r => srpc(['read'], [r]),
+      read_all: () => srpc(['read_all'], []),
       call: r => srpc(['call'], [r]),
       cycle: (debug = true) => srpc(['cycle'], [debug]),
       dump: path => srpc(['dump'], [path]),
@@ -86,8 +92,8 @@
     }
 
     $(document).ready(function () {
-      const monitoredRegs = new Set([])
-      const collapsedRegs = new Set([])
+      const expandedRegs = new Set([])
+
       async function executeAction (callback) {
         if (loading) return
         loading = true
@@ -107,60 +113,69 @@
       function renderMonitoredList () {
         const $list = $('#monitored-regs-list')
         $list.empty()
-        if (monitoredRegs.size === 0) {
+
+        const regKeys = Object.keys(registers)
+        if (regKeys.length === 0) {
           $list.append(`
             <div class="p-6 text-center text-gray-400 text-sm italic">
-              No registers monitored. Enter a number to add.
+              No registers found or monitored.
             </div>
           `)
           return
         }
-        const sortedNums = Array.from(monitoredRegs).sort((a, b) => parseInt(a) - parseInt(b))
+
+        const sortedNums = regKeys.map(Number).sort((a, b) => a - b)
+
         for (const num of sortedNums) {
-          const currentVal = cachedRegValues[num] !== undefined ? cachedRegValues[num] : ''
-          const isCollapsed = collapsedRegs.has(num.toString())
+          const currentVal = registers[num] !== undefined ? registers[num] : ''
+          const isExpanded = expandedRegs.has(num.toString())
+
           const rowHtml = `
-            <div class="flex flex-col gap-1.5 group" data-num="${num}">
+            <div class="flex flex-col gap-1.5 group border-b border-gray-100 py-1" data-num="${num}">
               <div class="flex items-center px-1">
-                <button class="btn-toggle-reg text-gray-500 hover:text-blue-500 p-1 rounded cursor-pointer flex items-center justify-center" title="${isCollapsed ? 'Expand' : 'Collapse'}">
-                  <span class="mdi ${isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-down'} text-xl"></span>
+                <button class="btn-toggle-reg text-gray-500 hover:text-blue-500 p-1 rounded cursor-pointer flex items-center justify-center" title="${isExpanded ? 'Collapse' : 'Expand'}">
+                  <span class="mdi ${isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'} text-xl"></span>
                 </button>
                 <span class="font-mono bg-blue-100 mr-2 px-2 py-0.5 rounded text-sm text-blue-800 font-bold shadow-sm">r${num}</span>
-                <button class="btn-save-reg cursor-pointer text-gray-500 hover:text-blue-500 p-1.5 rounded transition" title="Save">
+                <button class="btn-save-reg cursor-pointer text-gray-500 hover:text-blue-500 p-1.5 rounded transition" title="Save (Ctrl+S)">
                   <span class="mdi mdi-content-save"></span>
                 </button>
-                <button class="btn-remove-reg cursor-pointer text-gray-500 hover:text-red-600 p-1.5 rounded transition" title="Remove">
-                  <span class="mdi mdi-close"></span>
-                </button>
               </div>
-              <textarea class="w-full p-2.5 mb-2 border border-gray-300 rounded font-mono text-sm bg-gray-50 shadow-sm reg-value-field ${isCollapsed ? 'hidden' : ''}" rows="4" placeholder="(blank)">${currentVal}</textarea>
+              <textarea class="w-full p-2.5 mb-2 border border-gray-300 rounded font-mono text-sm bg-gray-50 shadow-sm reg-value-field ${isExpanded ? '' : 'hidden'}" rows="4" placeholder="(blank)">${currentVal}</textarea>
             </div>
           `
           $list.append(rowHtml)
         }
       }
 
-      async function refreshAllMonitoredRegisters() {
-        if (monitoredRegs.size === 0) return
-        const targets = Array.from(monitoredRegs)
-        const results = await Promise.all(targets.map(num => llmpu.read(num)))
-        targets.forEach((num, index) => { cachedRegValues[num] = results[index] !== undefined ? results[index] : '' })
-        renderMonitoredList();
+      async function fetchAllRegisters() {
+        const allRegisters = await llmpu.read_all() || {}
+        Object.keys(allRegisters).forEach(key => {
+          registers[Number(key)] = allRegisters[key]
+        })
+        renderMonitoredList()
+      }
+
+      function saveRegister($container) {
+        if (loading) return
+        const num = $container.data('num')
+        const newVal = $container.find('.reg-value-field').val()
+        executeAction(async () => { 
+          await llmpu.write(num, newVal)
+          registers[num] = newVal
+        })
       }
 
       $('#reg-lookup-num').on('keyup', function (e) {
-        if (e.key !== 'Enter' || loading) return;
-        const numInput = $(this).val().trim();
-        if (!numInput) return;
-        const targetNum = Number(numInput);
-        $(this).val('');
-        if (monitoredRegs.has(targetNum)) return
-        monitoredRegs.add(targetNum);
-        executeAction(async () => {
-          const val = await llmpu.read(targetNum)
-          cachedRegValues[targetNum] = val !== undefined ? val : ''
+        if (e.key !== 'Enter' || loading) return
+        const numInput = $(this).val().trim()
+        if (!numInput) return
+        const targetNum = Number(numInput)
+        $(this).val('')
+        if (registers[targetNum] === undefined) {
+          registers[targetNum] = ''
           renderMonitoredList()
-        })
+        }
       })
 
       $('#monitored-regs-list').on('click', '.btn-toggle-reg', function () {
@@ -169,42 +184,43 @@
         const $textarea = $parent.find('.reg-value-field')
         const $icon = $(this).find('.mdi')
 
-        if (collapsedRegs.has(num)) {
-          collapsedRegs.delete(num)
-          $textarea.removeClass('hidden')
-          $icon.removeClass('mdi-chevron-right').addClass('mdi-chevron-down')
-          $(this).attr('title', 'Collapse')
-        } else {
-          collapsedRegs.add(num)
+        if (expandedRegs.has(num)) {
+          expandedRegs.delete(num)
           $textarea.addClass('hidden')
           $icon.removeClass('mdi-chevron-down').addClass('mdi-chevron-right')
           $(this).attr('title', 'Expand')
+        } else {
+          expandedRegs.add(num)
+          $textarea.removeClass('hidden')
+          $icon.removeClass('mdi-chevron-right').addClass('mdi-chevron-down')
+          $(this).attr('title', 'Collapse')
         }
       })
 
       $('#monitored-regs-list').on('input', '.reg-value-field', function() {
         const num = $(this).closest('[data-num]').data('num')
-        cachedRegValues[num] = $(this).val()
+        registers[num] = $(this).val()
       })
 
       $('#monitored-regs-list').on('click', '.btn-save-reg', function () {
-        if (loading) return;
-        const $parent = $(this).closest('[data-num]')
-        const num = $parent.data('num')
-        const newVal = $parent.find('.reg-value-field').val()
-        executeAction(async () => { 
-          await llmpu.write(num, newVal);
-          cachedRegValues[num] = newVal;
-        })
+        saveRegister($(this).closest('[data-num]'))
       })
 
-      $('#monitored-regs-list').on('click', '.btn-remove-reg', function () {
-        const num = $(this).closest('[data-num]').data('num').toString()
-        monitoredRegs.delete(Number(num))
-        delete cachedRegValues[Number(num)]
-        collapsedRegs.delete(num)
-        renderMonitoredList()
+      $('#monitored-regs-list').on('keydown', '.reg-value-field', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+          e.preventDefault()
+          saveRegister($(this).closest('[data-num]'))
+        }
       })
+
+      $('#code-buffer').on('keydown', function (e) {
+        if (e.shiftKey && e.key === 'Enter') {
+          e.preventDefault()
+          $('#btn-run-custom').click()
+        }
+      })
+
+      $('#btn-refresh-all').on('click', function () { executeAction(fetchAllRegisters) })
 
       $('#btn-cycle').on('click', function () {
         executeAction(async () => {
@@ -218,7 +234,7 @@
         if (!currentCode.trim()) return
         executeAction(async () => {
           await llmpu.run(currentCode)
-          await refreshAllMonitoredRegisters()
+          await fetchAllRegisters()
         })
       })
 
@@ -250,14 +266,12 @@
           if (!result.isConfirmed || !result.value) return
           executeAction(async () => {
             await llmpu.load(result.value)
-            await refreshAllMonitoredRegisters()
+            await fetchAllRegisters()
           })
         })
       })
-
-      renderMonitoredList()
+      executeAction(fetchAllRegisters)
     })
   </script>
 </body>
 </html>
-
