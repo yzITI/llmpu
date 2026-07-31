@@ -35,7 +35,7 @@ def cycle(debug=False):
 
 def serve(port=22222, browser=True):
     srpc(port=port)
-    print(f"SRPC server is listening localhost:{port}")
+    print(f"SRPC server is listening localhost:{port}. Dashboard UI: https://yzITI.github.io/llmpu/")
     srpc["read"] = read
     srpc["read_all"] = read_all
     srpc["write"] = write
