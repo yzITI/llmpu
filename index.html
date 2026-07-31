@@ -84,8 +84,7 @@
     window.llmpu = {
       write: (r, content) => srpc(['write'], [r, content]),
       read_all: () => srpc(['read_all'], []),
-      call: r => srpc(['call'], [r]),
-      cycle: (debug = true) => srpc(['cycle'], [debug]),
+      cycle: () => srpc(['cycle'], []),
       dump: path => srpc(['dump'], [path]),
       load: path => srpc(['load'], [path]),
       run: code => srpc(['run'], [code])
@@ -225,7 +224,7 @@
 
       $('#btn-cycle').on('click', function () {
         executeAction(async () => {
-          const codeResult = await llmpu.cycle(true)
+          const codeResult = await llmpu.cycle()
           $('#code-buffer').val(codeResult)
         })
       })

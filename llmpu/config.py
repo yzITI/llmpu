@@ -5,5 +5,4 @@ config = {
     "model": "gemini-3.5-flash-lite", # llm model
     "api_key": "", # llm api key
     "llm_config": {}, # llm config
-    "log_path": "", # log file path
 }

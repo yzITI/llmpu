@@ -12,7 +12,7 @@ Imagine a processing unit powered by LLM and infinite registers. Each register c
 The following instruction set is provided to the processing unit as Python functions:
 - `read(r)` returns content in register number `r`
 - `write(r, content)` store string `content` in register number `r`
-- `call(r)` execute the content in register number `r` as Python code
+- `run(r)` execute the content in register number `r` as Python code
 
 And their description is not hard coded, but stored in register 0, for example, as a "firmware".
 
@@ -30,9 +30,8 @@ llmpu.init({ # default config here
     "L": 10000, # hard character number limit for register
     "model": "gemini-3.5-flash-lite", # llm model
     "llm_config": {}, # llm config
-    "log_path": "", # log path
     "EXEC": { # provided to execution environment, can be used by llm
-        "read": llmpu.read, "write": llmpu.write, "call": llmpu.call
+        "read": llmpu.read, "write": llmpu.write, "run": llmpu._run
     }
 })
 ```
@@ -43,15 +42,18 @@ Instruction set functions:
 # use register 100 as an example
 llmpu.write(100, "print('hello')") # truncate if exceed config["L"]
 llmpu.read(100) # "print('hello')"
-llmpu.call(100) # execute code in register 100
+llmpu.run(100) # execute code in register 100
+# llmpu.run also supports code string
 ```
+
+> Note: `llmpu._run` shares the caller's locals, while `llmpu.run` is isolated.
 
 Control functions:
 
 ```python
-# main clock cycle
-# present visible registers to LLM, then run the generated code.
-llmpu.cycle(debug=False) # debug: disable code run
+# main cycle: generate instructions
+code = llmpu.cycle()
+llmpu.run(code) # run the code
 
 # core dump
 llmpu.dump("dump.json") # dump state to a json file
@@ -86,8 +88,8 @@ llmpu.write(10000, "do nothing")
 llmpu.write(10001, "print hello to the screen, then call r10010")
 llmpu.write(10010, "print('hello again')\nwrite(1, read(10000))")
 
-llmpu.cycle() # r10001 will be loaded to r1
-llmpu.cycle() # print "hello", then call r10010, which will print "hello again" and write r10000 to r1
-llmpu.cycle() # pass
+llmpu.run(llmpu.cycle()) # r10001 will be loaded to r1
+llmpu.run(llmpu.cycle()) # print "hello", then call r10010, which will print "hello again" and write r10000 to r1
+llmpu.run(llmpu.cycle()) # pass
 ```
 
