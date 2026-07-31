@@ -11,7 +11,7 @@ def gemini_request(prompt):
         client = genai.Client(api_key=config["api_key"])
         types = genai.types
     _config = {
-        "thinking_config": types.ThinkingConfig(thinking_level="medium"),
+        "thinking_config": types.ThinkingConfig(thinking_level="high"),
         "response_mime_type": "application/json",
         "response_schema": types.Schema(type=types.Type.OBJECT, required=["instructions"], properties={ "instructions": types.Schema(type=types.Type.STRING, description="Python code") }),
         **config["llm_config"]

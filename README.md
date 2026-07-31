@@ -28,7 +28,7 @@ llmpu.init({ # default config here
     "api_key": "", # llm api key
     "VR": 16, # visibile register number
     "L": 10000, # hard character number limit for register
-    "model": "gemini-3.5-flash", # llm model
+    "model": "gemini-3.5-flash-lite", # llm model
     "llm_config": {}, # llm config
     "log_path": "", # log path
     "EXEC": { # provided to execution environment, can be used by llm
