@@ -81,7 +81,7 @@
 
   <script>
     let loading = false
-    const registers = {}
+    let registers = {}
 
     window.srpc = (N, A) => fetch(`http://localhost:${$('#port-input').val()}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ N, A })
@@ -154,10 +154,7 @@
       }
 
       async function fetchAllRegisters() {
-        const allRegisters = await llmpu.read_all() || {}
-        Object.keys(allRegisters).forEach(key => {
-          registers[Number(key)] = allRegisters[key]
-        })
+        registers = await llmpu.read_all() || {}
         renderList()
       }
 
