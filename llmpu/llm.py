@@ -24,3 +24,4 @@ def request(prompt):
     if config["model"].startswith("gemini-"):
         return gemini_request(prompt)
     raise ValueError(f"Unsupported model: {config['model']}")
+

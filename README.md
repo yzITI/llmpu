@@ -77,7 +77,7 @@ firmware = """You are a self-improving processing unit with registers: max 5000 
 API:
 - read(r: int) -> str: read register r.
 - write(r: int, content: str): write content in r (truncated to 5000 chars).
-- call(r: int): Run register r's content as Python code.
+- run(r: int): Run register r's content as Python code.
 
 common registers:
 - r1: current task

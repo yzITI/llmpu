@@ -29,6 +29,12 @@
           <span class="mdi mdi-database text-gray-500"></span> Registers
         </h2>
         <div class="flex items-center gap-2">
+          <button id="btn-expand-all" class="cursor-pointer text-gray-600 hover:text-blue-500 p-1.5 rounded transition flex items-center gap-1 text-sm" title="Expand All">
+            <span class="mdi mdi-expand-all"></span>
+          </button>
+          <button id="btn-save-all" class="cursor-pointer text-gray-600 hover:text-blue-500 p-1.5 rounded transition flex items-center gap-1 text-sm" title="Save All">
+            <span class="mdi mdi-content-save-all"></span>
+          </button>
           <button id="btn-refresh-all" class="cursor-pointer text-gray-600 hover:text-blue-500 p-1.5 rounded transition flex items-center gap-1 text-sm" title="Refresh">
             <span class="mdi mdi-refresh"></span>
           </button>
@@ -175,6 +181,39 @@
           registers[targetNum] = ''
           renderList()
         }
+      })
+
+      // Expand / Collapse All functionality
+      $('#btn-expand-all').on('click', function () {
+        const regKeys = Object.keys(registers)
+        if (regKeys.length === 0) return
+
+        const allExpanded = regKeys.every(k => expandedRegs.has(k))
+
+        if (allExpanded) {
+          expandedRegs.clear()
+          $(this).attr('title', 'Expand All')
+            .find('.mdi').removeClass('mdi-collapse-all').addClass('mdi-expand-all')
+        } else {
+          regKeys.forEach(k => expandedRegs.add(k))
+          $(this).attr('title', 'Collapse All')
+            .find('.mdi').removeClass('mdi-expand-all').addClass('mdi-collapse-all')
+        }
+        renderList()
+      })
+
+      // Save All functionality
+      $('#btn-save-all').on('click', function () {
+        const regKeys = Object.keys(registers)
+        if (regKeys.length === 0) return
+
+        executeAction(async () => {
+          const promises = regKeys.map(num => {
+            const val = registers[num] !== undefined ? registers[num] : ''
+            return llmpu.write(Number(num), val)
+          })
+          await Promise.all(promises)
+        })
       })
 
       $('#regs-list').on('click', '.btn-toggle-reg', function () {

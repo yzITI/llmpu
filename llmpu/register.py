@@ -34,5 +34,5 @@ def dump(path="dump.json"):
 def load(path="dump.json"):
     global registers, contents
     raw = json.load(open(path, "r"))
-    registers = raw.get("registers", {})
+    registers = { int(k): v for k, v in raw.get("registers", {}).items() }
     contents = raw.get("contents", {})
