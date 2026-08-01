@@ -11,7 +11,7 @@ def init(_config={}):
 init({ "EXEC": { "read": read, "write": write, "run": _run } })
 
 def read_registers(rs=range(config["VR"])):
-    return "".join(f"--- {r} ---\n\n{read(r)}\n\n" for r in rs)
+    return "".join(f"--- r{r} ---\n\n{read(r)}\n\n" for r in rs)
 
 def cycle():
     return request(read_registers())
