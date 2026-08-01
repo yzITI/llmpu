@@ -72,15 +72,12 @@ llmpu.serve(port=22222, browser=True)
 
 ```python
 # using default config
-firmware = """You are a self-improving processing unit with registers: max 5000 chars each, r0-r15 visible, more available but hidden.
+firmware = """You are a self-improving processing unit with registers: r0-r15 visible, more available but hidden. Perform operations by generating Python code.
 
 API:
 - read(r: int) -> str: read register r.
 - write(r: int, content: str): write content in r (truncated to 5000 chars).
 - run(r: int): Run register r's content as Python code.
-
-common registers:
-- r1: current task
 """
 llmpu.write(0, firmware)
 llmpu.write(1, "load r10001 to r1")
