@@ -1,6 +1,6 @@
 from .config import config
 from .register import read, read_all, write, dump, load
-from .runner import run as _run
+from .runner import run, _run
 from .llm import request
 from .srpc import srpc
 
@@ -15,9 +15,6 @@ def read_registers(rs=range(config["VR"])):
 
 def cycle():
     return request(read_registers())
-
-def run(c): # isolate locals
-    return _run(c)
 
 def serve(port=22222, browser=True):
     srpc(port=port)
