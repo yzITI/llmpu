@@ -61,8 +61,8 @@ class Handler(BaseHTTPRequestHandler):
             if callable(_hooks.get("after")):
                 _hooks["after"](ctx)
             return self.respond(200, json.dumps({ "R": ctx["R"] }), "application/json")
-        except:
-            return self.respond(500, "Internal Error")
+        except Exception as e:
+            return self.respond(500, f"Internal Error: {str(e)}")
     def log_message(*args):
         pass # disable http server log
 
