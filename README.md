@@ -24,10 +24,17 @@ pip install llmpu
 
 ```python
 import llmpu
-llmpu.init({ # default config here
+
+llmpu.init({
+  "api_key": "",
+  "model": "gemini-flash-latest"
+})
+
+# full config with default values:
+llmpu.init({
     "api_key": "", # llm api key
-    "VR": 16, # visibile register number
-    "L": 10000, # hard character number limit for register
+    "V": 16, # visible register number
+    "L": 16000, # hard character number limit for register
     "model": "gemini-flash-latest", # llm model
     "llm_config": {}, # llm config
     "EXEC": { # provided to execution environment, can be used by llm
@@ -46,7 +53,7 @@ llmpu.run(100) # execute code in register 100
 # llmpu.run also supports code string
 ```
 
-> Note: `llmpu._run` shares the caller's locals, while `llmpu.run` is isolated.
+> Note: `llmpu._run` shares the caller's locals and insert new variables to caller's globals, while `llmpu.run` is isolated.
 
 Control functions:
 
@@ -67,26 +74,3 @@ Server and UI:
 ```python
 llmpu.serve(port=22222, browser=True)
 ```
-
-## Minimum Example
-
-```python
-# using default config
-firmware = """You are a self-improving processing unit with registers: r0-r15 visible, more available but hidden. Perform operations by generating Python code.
-
-API:
-- read(r: int) -> str: read register r.
-- write(r: int, content: str): write content in r (truncated to 5000 chars).
-- run(r: int): Run register r's content as Python code.
-"""
-llmpu.write(0, firmware)
-llmpu.write(1, "load r10001 to r1")
-llmpu.write(10000, "do nothing")
-llmpu.write(10001, "print hello to the screen, then call r10010")
-llmpu.write(10010, "print('hello again')\nwrite(1, read(10000))")
-
-llmpu.run(llmpu.cycle()) # r10001 will be loaded to r1
-llmpu.run(llmpu.cycle()) # print "hello", then call r10010, which will print "hello again" and write r10000 to r1
-llmpu.run(llmpu.cycle()) # pass
-```
-

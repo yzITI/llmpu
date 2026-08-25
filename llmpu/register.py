@@ -6,10 +6,16 @@ contents = {} # hash -> content
 
 sha256 = lambda s: base64.b64encode(hashlib.sha256(s.encode('utf-8')).digest()).decode('utf-8')
 
+def clean(): # clean unused contents
+    for hash in list(contents.keys()):
+        if hash not in registers.values():
+            contents.pop(hash, None)
+
 def read(r):
     return contents.get(registers.get(r, ""), "")
 
 def read_all():
+    clean()
     return { r: read(r) for r in registers }
 
 def write(r, content):
@@ -21,11 +27,6 @@ def write(r, content):
     contents[hash] = _content
     registers[r] = hash
     return _content
-
-def clean(): # clean unused contents
-    for hash in list(contents.keys()):
-        if hash not in registers.values():
-            contents.pop(hash, None)
 
 def dump(path="dump.json"):
     clean()

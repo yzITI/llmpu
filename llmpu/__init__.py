@@ -10,11 +10,11 @@ def init(_config={}):
 # complete default initialization by providing execution environment
 init({ "EXEC": { "read": read, "write": write, "run": _run } })
 
-def read_registers(rs=range(config["VR"])):
+def stringify(rs=range(config["V"])):
     return "".join(f"--- r{r} ---\n\n{read(r)}\n\n" for r in rs)
 
 def cycle():
-    return request(read_registers())
+    return request(stringify())
 
 def serve(port=22222, browser=True):
     srpc(port=port)
