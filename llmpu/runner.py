@@ -2,24 +2,22 @@ import inspect, ctypes
 from .register import read, write
 from .config import config
 
+# this function is apparently very tricky
+# blame Python for making this so difficult
+
 def _run(c): # share locals and inject globals
     cf = lambda: inspect.currentframe().f_back.f_back # never assign frame to variables to avoid memory leakage
-    statically_known = set(cf().f_code.co_varnames) | set(cf().f_code.co_cellvars) | set(cf().f_code.co_freevars)
+    statically_known = set(cf().f_code.co_varnames + cf().f_code.co_cellvars + cf().f_code.co_freevars)
     merged = cf().f_locals | cf().f_globals
     exec(read(c) if isinstance(c, int) else c, merged, merged)
-    for k, v in merged.items():
-        if k in statically_known: # static local
-            cf().f_locals[k] = v
-            continue
-        if k not in cf().f_globals or k in cf().f_locals: # dynamic
-            cf().f_locals[k] = v
-        cf().f_globals[k] = v # new
-    for k in list(cf().f_locals.keys()):
-        if k not in merged:
-            del cf().f_locals[k]
-    for k in list(cf().f_globals.keys()):
-        if k not in merged:
-            del cf().f_globals[k]
+    cf().f_locals.update({ k: merged[k] for k in (merged.keys() & statically_known) |
+        (merged.keys() - cf().f_globals.keys()) |
+        (merged.keys() & cf().f_locals.keys()) })
+    cf().f_globals.update({ k: merged[k] for k in merged.keys() - statically_known })
+    for k in cf().f_locals.keys() - merged.keys():
+        del cf().f_locals[k]
+    for k in cf().f_globals.keys() - merged.keys():
+        del cf().f_globals[k]
 
 def run(c): # isolate scope
     merged = config["EXEC"] | {}
