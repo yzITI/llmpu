@@ -1,4 +1,4 @@
-import inspect, ctypes
+import sys
 from .register import read, write
 from .config import config
 
@@ -6,7 +6,7 @@ from .config import config
 # blame Python for making this so difficult
 
 def _run(c): # share locals and inject globals
-    cf = lambda: inspect.currentframe().f_back.f_back # never assign frame to variables to avoid memory leakage
+    cf = lambda: sys._getframe(2) # never assign frame to variables to avoid memory leakage
     statically_known = set(cf().f_code.co_varnames + cf().f_code.co_cellvars + cf().f_code.co_freevars)
     merged = cf().f_locals | cf().f_globals
     exec(read(c) if isinstance(c, int) else c, merged, merged)
