@@ -11,7 +11,7 @@ def init(_config={}):
 init({ "EXEC": { "read": read, "write": write, "run": _run } })
 
 def stringify(rs=range(config["V"])):
-    return "".join(f"--- r{r} ---\n\n{read(r)}\n\n" for r in rs)
+    return "\n\n".join(f'<r{r}>\n{read(r)}\n</r{r}>' for r in rs)
 
 def cycle():
     return request(stringify())
