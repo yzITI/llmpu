@@ -20,5 +20,5 @@ def _run(c): # share locals and inject globals
         del cf().f_globals[k]
 
 def run(c): # isolate scope
-    merged = config["EXEC"] | {}
+    merged = config["IS"] | {}
     exec(read(c) if isinstance(c, int) else c, merged, merged)

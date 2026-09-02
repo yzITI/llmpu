@@ -37,7 +37,7 @@ llmpu.init({
     "L": 16000, # hard character number limit for register
     "model": "gemini-flash-latest", # llm model
     "llm_config": {}, # llm config
-    "EXEC": { # provided to execution environment, can be used by llm
+    "IS": { # instruction set, can be used by llm
         "read": llmpu.read, "write": llmpu.write, "run": llmpu._run
     }
 })
@@ -63,8 +63,8 @@ code = llmpu.cycle()
 llmpu.run(code) # run the code
 
 # core dump
-llmpu.dump("dump.json") # dump state to a json file
-llmpu.load("dump.json") # load state from a json file
+llmpu.dump("dump.json") # dump registers to a json file
+llmpu.load("dump.json") # load registers from a json file
 ```
 
 Server and UI:

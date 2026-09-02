@@ -8,7 +8,7 @@ def init(_config={}):
     config.update(_config)
 
 # complete default initialization by providing execution environment
-init({ "EXEC": { "read": read, "write": write, "run": _run } })
+init({ "IS": { "read": read, "write": write, "run": _run } })
 
 def stringify(rs=range(config["V"])):
     return "\n\n".join(f'<r{r}>\n{read(r)}\n</r{r}>' for r in rs)
