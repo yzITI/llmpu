@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -69,6 +68,8 @@ instance/
 .scrapy
 
 # Sphinx documentation
+#
+# node_modules
 docs/_build/
 
 # PyBuilder
@@ -216,3 +217,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# for Nodejs and Svelte
+node_modules
+pnpm-lock.yaml
+pnpm-workspace.yaml
+package-lock.json
+.svelte-kit
