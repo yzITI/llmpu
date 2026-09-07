@@ -13,7 +13,7 @@ def gemini_request(prompt):
         gemini_client = genai.Client(api_key=config["api_key"])
         gemini_types = genai.types
     _config = {
-        "thinking_config": gemini_types.ThinkingConfig(thinking_level="high"),
+        # "thinking_config": gemini_types.ThinkingConfig(thinking_level="high"),
         "response_mime_type": "application/json",
         "response_schema": gemini_types.Schema(
             type=gemini_types.Type.OBJECT,
