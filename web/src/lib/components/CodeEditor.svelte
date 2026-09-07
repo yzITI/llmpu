@@ -42,9 +42,8 @@
   })
 
   $effect(() => {
-    if (editorInstance && value !== editorInstance.getValue()) {
-      editorInstance.setValue(value ?? '')
-    }
+    if (value === editorInstance?.getValue() || !editorInstance) return
+    editorInstance.setValue(value ?? '')
   })
 </script>
 

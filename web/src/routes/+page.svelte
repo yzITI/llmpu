@@ -1,6 +1,7 @@
 <script>
   import Swal from 'sweetalert2'
   import srpc from '$lib/utilities/srpc.js'
+  import { debounce } from '$lib/utilities/utils.js'
   import Cell from '$lib/components/Cell.svelte'
   import CodeEditor from '$lib/components/CodeEditor.svelte'
   import { AIcon } from 'ace.svelte'
@@ -14,6 +15,7 @@
   let content = $state(''), code = $state('')
   let interval = $state(''), countdown = $state('N/A')
   let loading = $state(false), connected = $state(false)
+  let refs = $state([[], [], []])
 
   let rs = $derived([...new Set([...Object.keys(registers), ...Object.keys(last)])].map(Number).sort((a, b) => a - b))
   $effect(() => LS.url = url)
@@ -29,7 +31,7 @@
   async function readAll () {
     if (loading) return
     last = JSON.parse(JSON.stringify(registers))
-    loading = 'Loading registers...'
+    loading = 'Reading...'
     connected = true
     try {
       registers = await srpc.read_all()
@@ -51,6 +53,9 @@
   function s (r) {
     let res = [0, 1]
     if (registers[r]) res[0] = 1
+    if (refs[0].includes(r)) res[1] = 3
+    if (refs[1].includes(r)) res[1] = 4
+    if (refs[2].includes(r)) res[1] = 5
     if (registers[r] !== last[r]) res[1] = 2
     if (r === focus) res[1] = 0
     return res
@@ -58,7 +63,7 @@
 
   async function load () {
     if (loading || !connected) return
-    loading = 'Loading dump file...'
+    loading = 'Loading...'
     try {
       await srpc.load(dumpPath)
     } catch (e) {
@@ -82,6 +87,7 @@
 
   async function cycle () {
     if (loading || !connected) return
+    await readAll()
     loading = 'Cycling...'
     try {
       code = await srpc.cycle()
@@ -104,14 +110,27 @@
   }
 
   async function writeFocus () {
+    if (loading || !connected) return
+    loading = 'Writing...'
+    await srpc.write(focus, registers[focus])
+    loading = false
   }
+
+  function trace () {
+    const match = r => [...code.matchAll(r)].map(match => Number(match[1]))
+    refs[0] = match(/read\(([0-9a-fA-Fx]+)\)/g)
+    refs[1] = match(/write\(([0-9a-fA-Fx]+)/g)
+    refs[2] = match(/run\(([0-9a-fA-Fx]+)\)/g)
+  }
+  const debounceTrace = debounce(trace)
+  $effect(() => { code; debounceTrace() })
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
   <div class="w-1/2 h-full bg-gray-700 text-white">
     <div class="flex items-center justify-between p-4">
       <div class="flex items-center">
-        <button class="cursor-pointer w-5 h-5 font-bold mr-2 rounded-full {!connected ? 'bg-gray-500' : (loading ? 'bg-amber-500' : 'bg-green-500')}" onclick={init} title="connect"></button>
+        <button class="cursor-pointer w-5 h-5 font-bold mr-2 rounded-full {!connected ? 'bg-gray-500' : (loading ? 'bg-red-500' : 'bg-green-500')}" onclick={init} title="connect"></button>
         <b>{ connected ? (loading || 'Idle') : 'Disconnected'}</b>
       </div>
       <input bind:value={url} placeholder="Server URL" class="outline-none block grow text-right">
@@ -144,17 +163,17 @@
         </div>
       </div>
       <div class="flex items-center transition-all">
-        <button class="cursor-pointer mr-4 transition-all hover:scale-150 {loading === 'Cycling...' ? 'text-red-500' : 'text-white'}" onclick={cycle} title="cycle">
+        <button class="cursor-pointer mr-4 transition-all hover:scale-130 {loading === 'Cycling...' ? 'text-red-500' : 'text-white'}" onclick={cycle} title="cycle">
           <AIcon path={mdiSquareRounded} size="2.25rem"></AIcon>
         </button>
-        <button class="cursor-pointer transition-all hover:scale-150 {loading === 'Running...' ? 'text-orange-500' : 'text-white'}" onclick={run} title="run">
+        <button class="cursor-pointer transition-all hover:scale-130 {loading === 'Running...' ? 'text-red-500' : 'text-white'}" onclick={run} title="run">
           <AIcon path={mdiPlay} size="2.5rem"></AIcon>
         </button>
       </div>
     </div>
     <div class="flex flex-wrap items-start p-4 w-full">
       {#each rs as r}
-        <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r} />
+        <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r } />
       {/each}
     </div>
   </div>
@@ -163,9 +182,8 @@
       <CodeEditor bind:value={code}></CodeEditor>
     </div>
     <div class="h-1/2 transition-all {focus !== false ? 'bg-blue-200' : 'bg-gray-200'}">
-      Under construction
       {#if focus !== false}
-        <textarea class="w-full h-full outline-none p-2" bind:value={registers[focus]}></textarea>
+        <textarea class="w-full h-full outline-none p-2" bind:value={registers[focus]} onchange={writeFocus}></textarea>
       {/if}
     </div>
   </div>
