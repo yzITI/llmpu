@@ -87,6 +87,7 @@
 
   async function cycle () {
     if (loading || !connected) return
+    code = ''
     await readAll()
     loading = 'Cycling...'
     try {
@@ -124,6 +125,26 @@
   }
   const debounceTrace = debounce(trace)
   $effect(() => { code; debounceTrace() })
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms))
+  async function tick () {
+    if (!(interval > 0)) return countdown = 'N/A'
+    if (isNaN(countdown)) return countdown = 0
+    if (countdown <= 0) {
+      await cycle()
+      await run()
+      return countdown = Number(interval)
+    }
+    countdown--
+  }
+  async function loop () {
+    while (1) {
+      await tick()
+      const n = Date.now()
+      await sleep((Math.floor(n / 1000) + 1 - n / 1000) * 1000)
+    }
+  }
+  loop()
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
@@ -147,7 +168,7 @@
       </div>
       <div class="flex items-center">
         <code>{countdown} s</code>
-        <AIcon path={mdiClockOutline} class="mx-2"></AIcon>
+        <AIcon path={mdiClockOutline} class="mx-2 { countdown <= 0 ? 'text-red-500' : 'text-white'}"></AIcon>
         <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
       </div>
     </div>
