@@ -31,7 +31,7 @@
   async function readAll () {
     if (loading) return
     last = JSON.parse(JSON.stringify(registers))
-    loading = 'Reading...'
+    loading = 'Reading'
     connected = true
     try {
       registers = await srpc.read_all()
@@ -63,7 +63,7 @@
 
   async function load () {
     if (loading || !connected) return
-    loading = 'Loading...'
+    loading = 'Loading'
     try {
       await srpc.load(dumpPath)
     } catch (e) {
@@ -76,7 +76,7 @@
 
   async function dump () {
     if (loading || !connected) return
-    loading = 'Dumping...'
+    loading = 'Dumping'
     try {
       await srpc.dump(dumpPath)
     } catch (e) {
@@ -89,7 +89,7 @@
     if (loading || !connected) return
     code = ''
     await readAll()
-    loading = 'Cycling...'
+    loading = 'Cycling'
     try {
       code = await srpc.cycle()
     } catch (e) {
@@ -100,7 +100,7 @@
 
   async function run () {
     if (loading || !connected) return
-    loading = 'Running...'
+    loading = 'Running'
     try {
       await srpc.run(code)
     } catch (e) {
@@ -110,9 +110,15 @@
     readAll()
   }
 
+  async function cycle2run () {
+    if (loading || !connected) return
+    await cycle()
+    await run()
+  }
+
   async function writeFocus () {
     if (loading || !connected) return
-    loading = 'Writing...'
+    loading = 'Writing'
     await srpc.write(focus, registers[focus])
     loading = false
   }
@@ -131,8 +137,7 @@
     if (!(interval > 0)) return countdown = 'N/A'
     if (isNaN(countdown)) return countdown = 0
     if (countdown <= 0) {
-      await cycle()
-      await run()
+      cycle2run()
       return countdown = Number(interval)
     }
     countdown--
@@ -150,11 +155,11 @@
 <div class="w-full h-screen min-w-[768px] flex">
   <div class="w-1/2 h-full bg-gray-700 text-white">
     <div class="flex items-center justify-between p-4">
+      <input bind:value={url} placeholder="Server URL" class="outline-none block grow">
       <div class="flex items-center">
-        <button class="cursor-pointer w-5 h-5 font-bold mr-2 rounded-full {!connected ? 'bg-gray-500' : (loading ? 'bg-red-500' : 'bg-green-500')}" onclick={init} title="connect"></button>
         <b>{ connected ? (loading || 'Idle') : 'Disconnected'}</b>
+        <button class="cursor-pointer w-5 h-5 font-bold ml-2 rounded-full {!connected ? 'bg-gray-500' : (loading ? 'bg-yellow-500' : 'bg-green-500')}" onclick={init} title="connect"></button>
       </div>
-      <input bind:value={url} placeholder="Server URL" class="outline-none block grow text-right">
     </div>
     <div class="flex items-center px-3 justify-between">
       <div class="flex items-center grow">
@@ -167,9 +172,12 @@
         <input bind:value={dumpPath} placeholder="Dump Path" class="outline-none block grow">
       </div>
       <div class="flex items-center">
-        <code>{countdown} s</code>
-        <AIcon path={mdiClockOutline} class="mx-2 { countdown <= 0 ? 'text-red-500' : 'text-white'}"></AIcon>
-        <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
+        <button class="cursor-pointer mr-4 transition-all hover:scale-130 {loading === 'Cycling' ? 'text-yellow-500' : 'text-white'}" onclick={cycle} title="cycle">
+          <AIcon path={mdiSquareRounded} size="2.25rem"></AIcon>
+        </button>
+        <button class="cursor-pointer transition-all hover:scale-130 {loading === 'Running' ? 'text-yellow-500' : 'text-white'}" onclick={run} title="run">
+          <AIcon path={mdiPlay} size="2.5rem"></AIcon>
+        </button>
       </div>
     </div>
     <div class="px-4 my-3 w-full flex items-center justify-between">
@@ -183,13 +191,10 @@
           <input class="outline-none w-20 block" bind:value={newRegister} placeholder="______" onkeyup={newRegisterKeyup}>
         </div>
       </div>
-      <div class="flex items-center transition-all">
-        <button class="cursor-pointer mr-4 transition-all hover:scale-130 {loading === 'Cycling...' ? 'text-red-500' : 'text-white'}" onclick={cycle} title="cycle">
-          <AIcon path={mdiSquareRounded} size="2.25rem"></AIcon>
-        </button>
-        <button class="cursor-pointer transition-all hover:scale-130 {loading === 'Running...' ? 'text-red-500' : 'text-white'}" onclick={run} title="run">
-          <AIcon path={mdiPlay} size="2.5rem"></AIcon>
-        </button>
+      <div class="flex items-center">
+        <code>{countdown} s</code>
+        <AIcon path={mdiClockOutline} class="mx-2 { countdown <= 0 ? 'text-yellow-500' : 'text-white'}"></AIcon>
+        <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
       </div>
     </div>
     <div class="flex flex-wrap items-start p-4 w-full">
