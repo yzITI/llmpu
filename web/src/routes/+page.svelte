@@ -67,7 +67,7 @@
     try {
       await srpc.load(dumpPath)
     } catch (e) {
-      Swal.fire('Error', e.toString(), 'error')
+      await Swal.fire('Error', e.toString(), 'error')
     }
     loading = false
     await readAll()
@@ -80,7 +80,7 @@
     try {
       await srpc.dump(dumpPath)
     } catch (e) {
-      Swal.fire('Error', e.toString(), 'error')
+      await Swal.fire('Error', e.toString(), 'error')
     }
     loading = false
   }
@@ -93,7 +93,7 @@
     try {
       code = await srpc.cycle()
     } catch (e) {
-      Swal.fire('Error', e.toString(), 'error')
+      await Swal.fire('Error', e.toString(), 'error')
     }
     loading = false
   }
@@ -104,7 +104,7 @@
     try {
       await srpc.run(code)
     } catch (e) {
-      Swal.fire('Error', e.toString(), 'error')
+      await Swal.fire('Error', e.toString(), 'error')
     }
     loading = false
     readAll()
