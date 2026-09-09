@@ -5,7 +5,7 @@
   import Cell from '$lib/components/Cell.svelte'
   import CodeEditor from '$lib/components/CodeEditor.svelte'
   import { AIcon } from 'ace.svelte'
-  import { mdiUpload, mdiDownload, mdiRefresh, mdiPlus, mdiPlay, mdiSquareRounded, mdiClockOutline  } from '@mdi/js'
+  import { mdiUpload, mdiDownload, mdiRefresh, mdiPlus, mdiPlay, mdiStarFourPoints, mdiClockOutline  } from '@mdi/js'
 
   const LS = window.localStorage, SS = window.sessionStorage
   let url = $state(LS.url || 'http://localhost:22222/')
@@ -51,13 +51,13 @@
   }
 
   function s (r) {
-    let res = [0, 1]
+    let res = [0, 0, 0, 0]
     if (registers[r]) res[0] = 1
-    if (refs[0].includes(r)) res[1] = 3
-    if (refs[1].includes(r)) res[1] = 4
-    if (refs[2].includes(r)) res[1] = 5
-    if (registers[r] !== last[r]) res[1] = 2
-    if (r === focus) res[1] = 0
+    if (r === focus) res[1] = 1
+    if (refs[0].includes(r)) res[2] = 1
+    if (refs[1].includes(r)) res[2] = 2
+    if (refs[2].includes(r)) res[2] = 3
+    if (registers[r] !== last[r]) res[3] = 1
     return res
   }
 
@@ -172,8 +172,8 @@
         <input bind:value={dumpPath} placeholder="Dump Path" class="outline-none block grow">
       </div>
       <div class="flex items-center">
-        <button class="cursor-pointer mr-4 transition-all hover:scale-130 {loading === 'Cycling' ? 'text-yellow-500' : 'text-white'}" onclick={cycle} title="cycle">
-          <AIcon path={mdiSquareRounded} size="2.25rem"></AIcon>
+        <button class="cursor-pointer mr-2 transition-all hover:scale-130 {loading === 'Cycling' ? 'text-yellow-500' : 'text-white'}" onclick={cycle} title="cycle">
+          <AIcon path={mdiStarFourPoints} size="2.25rem"></AIcon>
         </button>
         <button class="cursor-pointer transition-all hover:scale-130 {loading === 'Running' ? 'text-yellow-500' : 'text-white'}" onclick={run} title="run">
           <AIcon path={mdiPlay} size="2.5rem"></AIcon>
@@ -207,7 +207,7 @@
     <div class="h-1/2">
       <CodeEditor bind:value={code}></CodeEditor>
     </div>
-    <div class="h-1/2 transition-all {focus !== false ? 'bg-blue-200' : 'bg-gray-200'}">
+    <div class="h-1/2 transition-all {focus !== false ? 'bg-gray-200' : 'bg-gray-300'}">
       {#if focus !== false}
         <textarea class="w-full h-full outline-none p-2" bind:value={registers[focus]} onchange={writeFocus}></textarea>
       {/if}
