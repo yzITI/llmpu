@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llmpu"
-version = "0.3.5"
+version = "0.4.0"
 description = "Large Language Model Processing Unit"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -15,7 +15,7 @@ dependencies = [
     "anthropic",
     "openai",
     "pyyaml",
-    "numpy>=2.4.6",
+    "numpy",
 ]
 
 [project.urls]

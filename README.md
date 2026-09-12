@@ -25,13 +25,13 @@ pip install llmpu
 ```python
 import llmpu
 
-llmpu.init({
+llmpu.config({
   "api_key": "",
   "model": "gemini-flash-latest"
 })
 
 # full config with default values:
-llmpu.init({
+llmpu.config({
     "api_key": "", # llm api key
     "V": 16, # visible register number
     "L": 16000, # hard character number limit for register

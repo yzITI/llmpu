@@ -1,16 +1,17 @@
-from .config import config
+from .config import config as _config
 from .register import read, read_all, write, dump, load
 from .runner import run, _run
 from .llm import request
 from .srpc import srpc
 
-def init(_config={}):
-    config.update(_config)
+def config(c):
+    _config.update(c)
+    return _config
 
-# complete default initialization by providing execution environment
-init({ "IS": { "read": read, "write": write, "run": _run } })
+# providing default instruction set
+config({ "IS": { "read": read, "write": write, "run": _run } })
 
-def stringify(rs=range(config["V"])):
+def stringify(rs=range(_config["V"])):
     return "\n\n".join(f'<0x{r:X}>\n{read(r)}\n</0x{r:X}>' for r in rs)
 
 def cycle():
