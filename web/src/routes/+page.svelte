@@ -116,10 +116,10 @@
     await run()
   }
 
-  async function writeFocus () {
+  async function write (r) {
     if (loading || !connected) return
     loading = 'Writing'
-    await srpc.write(focus, registers[focus])
+    await srpc.write(r, registers[r])
     loading = false
   }
 
@@ -150,6 +150,10 @@
     }
   }
   loop()
+
+  window.registers = registers
+  window.write = write
+  console.log('registers and write(r) are exposed here.\n\n As an example: const input = c => { registers[0x4] = `user input: ${c}`; write(0x4); }')
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
@@ -209,7 +213,7 @@
     </div>
     <div class="h-1/2 transition-all {focus !== false ? 'bg-gray-200' : 'bg-gray-300'}">
       {#if focus !== false}
-        <textarea class="w-full h-full outline-none p-2" bind:value={registers[focus]} onchange={writeFocus}></textarea>
+        <textarea class="w-full h-full outline-none p-2" bind:value={registers[focus]} onchange={() => write(focus)}></textarea>
       {/if}
     </div>
   </div>
