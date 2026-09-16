@@ -151,9 +151,11 @@
   }
   loop()
 
-  window.registers = registers
-  window.write = write
-  console.log('registers and write(r) are exposed here.\n\n As an example: const input = c => { registers[0x4] = `user input: ${c}`; write(0x4); }')
+  window.write = (r, content) => {
+    registers[r] = content
+    write(r)
+  }
+  console.log('write(r, content) is exposed here')
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
