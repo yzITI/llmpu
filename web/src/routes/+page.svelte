@@ -159,7 +159,7 @@
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
-  <div class="w-1/2 h-full bg-gray-700 text-white">
+  <div class="w-1/2 h-full bg-gray-700 text-white flex flex-col">
     <div class="flex items-center justify-between p-4">
       <input bind:value={url} placeholder="Server URL" class="outline-none block grow">
       <div class="flex items-center">
@@ -203,7 +203,7 @@
         <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
       </div>
     </div>
-    <div class="flex flex-wrap items-start p-4 w-full">
+    <div class="flex flex-wrap items-start p-4 w-full grow overflow-auto">
       {#each rs as r}
         <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r } />
       {/each}
