@@ -6,7 +6,7 @@ registers = {} # index -> content
 def reg(r, content=None):
     if content is not None:
         if not content: registers.pop(int(r), None)
-        else registers[int(r)] = str(content)[:config["L"]]
+        else: registers[int(r)] = str(content)[:config["L"]]
     return registers.get(int(r), "")
 
 def all():

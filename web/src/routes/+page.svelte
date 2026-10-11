@@ -15,7 +15,7 @@
   let content = $state(''), code = $state('')
   let interval = $state(''), countdown = $state('N/A')
   let loading = $state(false), connected = $state(false)
-  let refs = $state([[], [], []])
+  let refs = $state([])
 
   let rs = $derived([...new Set([...Object.keys(registers), ...Object.keys(last)])].map(Number).sort((a, b) => a - b))
   $effect(() => LS.url = url)
@@ -51,9 +51,7 @@
     let res = [0, 0, 0, 0]
     if (registers[r]) res[0] = 1
     if (r === focus) res[1] = 1
-    if (refs[0].includes(r)) res[2] = 1
-    if (refs[1].includes(r)) res[2] = 2
-    if (refs[2].includes(r)) res[2] = 3
+    if (refs.includes(r)) res[2] = 1
     if (registers[r] !== last[r]) res[3] = 1
     return res
   }
@@ -122,9 +120,7 @@
 
   function trace () {
     const match = r => [...code.matchAll(r)].map(match => Number(match[1]))
-    refs[0] = match(/read\(([0-9a-fA-Fx]+)\)/g)
-    refs[1] = match(/write\(([0-9a-fA-Fx]+)/g)
-    refs[2] = match(/run\(([0-9a-fA-Fx]+)\)/g)
+    refs = match(/reg\(([0-9a-fA-Fx]+)\)/g)
   }
   const debounceTrace = debounce(trace)
   $effect(() => { code; debounceTrace() })
@@ -148,11 +144,11 @@
   }
   loop()
 
-  window.write = (r, content) => {
+  window.reg = (r, content) => {
     registers[r] = content
     write(r)
   }
-  console.log('write(r, content) is exposed here')
+  console.log('reg(r, content) is exposed here')
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">

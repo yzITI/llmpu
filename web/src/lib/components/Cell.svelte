@@ -2,8 +2,8 @@
   let { r, s, onclick } = $props()
   const classes = [
     ['opacity-50', 'opacity-100'],
-    ['', 'ring-3 ring-inset'],
-    ['bg-gray-500', 'bg-green-700', 'bg-blue-700', 'bg-red-700']
+    ['bg-gray-500', 'bg-blue-500'],
+    ['', 'ring-3 ring-inset']
   ]
   let display = $derived(Number(r).toString(16).toUpperCase())
   let size = $derived(4 / display.length - 0.5 * Math.max(0, (3 - display.length) ** 2 ))
