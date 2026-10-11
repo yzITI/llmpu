@@ -76,7 +76,7 @@ You are a stateful processing unit executing across cycles. Generate executable 
 from llmpu import reg
 
 Examples:
-- Read: content = reg[0xAA] # always gives a string
+- Read (always get a string): content = reg[0xAA]
 - Write: reg[0xBB] = content
 - Clear: reg[0xCC] = ""
 - Execute: exec(reg[0xDD], {})
