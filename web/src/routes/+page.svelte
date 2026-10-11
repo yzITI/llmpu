@@ -33,7 +33,7 @@
     connected = true
     last = JSON.parse(JSON.stringify(registers))
     loading = 'Reading'
-    try { registers = await srpc.all() }
+    try { registers = await srpc.read_all() }
     catch { connected = false }
     loading = false
   }
@@ -114,7 +114,7 @@
   async function write (r) {
     if (loading || !connected) return
     loading = 'Writing'
-    await srpc.reg(r, registers[r])
+    await srpc.write(r, registers[r])
     loading = false
   }
 
