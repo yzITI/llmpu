@@ -120,7 +120,7 @@
 
   function trace () {
     const match = r => [...code.matchAll(r)].map(match => Number(match[1]))
-    refs = match(/reg\(([0-9a-fA-Fx]+)\)/g)
+    refs = match(/reg\[([0-9a-fA-Fx]+)\]/g)
   }
   const debounceTrace = debounce(trace)
   $effect(() => { code; debounceTrace() })

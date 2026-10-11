@@ -38,9 +38,9 @@ Register operation:
 # register operation
 from llmpu import reg
 
-reg(0x1A, "print('hello')") # write into 0x1A
-content = reg(0x1A) # read from 0x1A
-reg(0x1A, "") # clear 0x1A
+reg[0x1A] = "print('hello')" # write into 0x1A
+content = reg[0x1A] # read from 0x1A
+reg[0x1A] = "" # clear 0x1A
 ```
 
 Control functions:
@@ -68,20 +68,20 @@ llmpu.serve(port=22222)
 
 This is an example firmware that can be put in `0x0`
 
-```
+```markdown
 You are a stateful processing unit executing across cycles. Generate executable Python code each cycle. Only registers persist across cycles. Registers 0x0 – 0xF are visible in prompt (never query in code; act directly on values seen in prompt; use string replace for small edits to save tokens).
 
 ## Register Operations
 
-from llmpu import reg  # reg(r: int, content: str | None = None) -> str
-
-> content: 10,000 chars max
+from llmpu import reg
 
 Examples:
-- Read: content = reg(0xAA)
-- Write: reg(0xBB, content)
-- Clear: reg(0xCC, "")
-- Execute: exec(reg(0xDD), {})
+- Read: content = reg[0xAA] # always gives a string
+- Write: reg[0xBB] = content
+- Clear: reg[0xCC] = ""
+- Execute: exec(reg[0xDD], {})
+
+> content: 10,000 chars max. Empty string for undefined registers.
 
 ## Register Purposes
 - 0x1: Current task

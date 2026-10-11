@@ -1,5 +1,5 @@
 from .config import config
-from .register import reg, registers, dump, load, all
+from .register import reg, registers, dump, load
 from .llm import request
 from .srpc import srpc
 
@@ -16,6 +16,6 @@ def serve(port=22222):
     srpc["cycle"] = cycle
     srpc["dump"] = dump
     srpc["load"] = load
-    srpc["write"] = lambda r, content: reg[r] = content
+    srpc["write"] = lambda r, content: reg.__setitem__(r, content)
     srpc["read_all"] = lambda: registers
     srpc["exec"] = lambda c: exec(c, {})
