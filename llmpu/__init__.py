@@ -1,29 +1,20 @@
-from .config import config as _config
-from .register import read, read_all, write, dump, load
-from .runner import run
+from .config import config
+from .register import reg, dump, load, all
 from .llm import request
 from .srpc import srpc
 
-def config(c):
-    _config.update(c)
-    return _config
-
-def stringify(rs=range(_config["V"])):
+def stringify(rs=None):
+    if rs is None: rs = range(config["V"])
     return "\n\n".join(f'<0x{r:X}>\n{read(r)}\n</0x{r:X}>' for r in rs)
 
 def cycle():
     return request(stringify())
 
-def serve(port=22222, browser=True):
+def serve(port=22222):
     srpc(port=port)
     print(f"SRPC server is listening localhost:{port}. Dashboard UI: https://yzITI.github.io/llmpu/")
-    srpc["read"] = read
-    srpc["read_all"] = read_all
-    srpc["write"] = write
+    srpc["reg"] = reg
     srpc["dump"] = dump
     srpc["load"] = load
-    srpc["run"] = lambda c: run(c) # isolate frame
     srpc["cycle"] = cycle
-    if browser:
-        import webbrowser
-        webbrowser.open("https://yzITI.github.io/llmpu/")
+    srpc["exec"] = lambda c: exec(c, {})
