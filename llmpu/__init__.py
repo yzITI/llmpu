@@ -5,7 +5,7 @@ from .srpc import srpc
 
 def stringify(rs=None):
     if rs is None: rs = range(config["V"])
-    return "\n\n".join(f'<0x{r:X}>\n{reg[r]}\n</0x{r:X}>' for r in rs)
+    return "\n\n".join(f'<reg[0x{r:X}]>\n{reg[r]}\n</reg[0x{r:X}]>\n' for r in rs)
 
 def cycle():
     return request(stringify())
