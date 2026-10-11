@@ -144,11 +144,11 @@
   }
   loop()
 
-  window.reg = (r, content) => {
+  window.write = (r, content) => {
     registers[r] = content
     write(r)
   }
-  console.log('reg(r, content) is exposed here')
+  console.log('write(r, content) is exposed here')
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">

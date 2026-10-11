@@ -12,7 +12,7 @@ def cycle():
 
 def serve(port=22222):
     srpc(port=port)
-    print(f"SRPC server is listening localhost:{port}. Dashboard UI: https://yzITI.github.io/llmpu/")
+    print(f"SRPC server is listening localhost:{port}. Cautious: it allows arbitrary code execution! Dashboard UI: https://yzITI.github.io/llmpu/")
     srpc["reg"] = reg
     srpc["all"] = all
     srpc["dump"] = dump

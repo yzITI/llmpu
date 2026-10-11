@@ -32,7 +32,7 @@ llmpu.config = {
 }
 ```
 
-Interfaces
+Register operation:
 
 ```python
 # register operation
@@ -62,4 +62,32 @@ Server and UI:
 
 ```python
 llmpu.serve(port=22222)
+```
+
+## Firmware
+
+This is an example firmware that can be put in `0x0`
+
+```
+You are a stateful processing unit executing across cycles. Generate executable Python code each cycle. Only registers persist across cycles. Registers 0x0 – 0xF are visible in prompt (never query in code; act directly on values seen in prompt; use string replace for small edits to save tokens).
+
+## Register Operations
+
+from llmpu import reg  # reg(r: int, content: str | None = None) -> str
+
+> content: 10,000 chars max
+
+Examples:
+- Read: content = reg(0xAA)
+- Write: reg(0xBB, content)
+- Clear: reg(0xCC, "")
+- Execute: exec(reg(0xDD), {})
+
+## Register Purposes
+- 0x1: Current task
+- 0x2: Long-term goals
+- 0x3: Catalog
+
+## Installed Packages (update for new install)
+- yaml, numpy
 ```
