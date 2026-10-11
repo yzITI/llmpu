@@ -30,14 +30,11 @@
 
   async function readAll () {
     if (loading) return
+    connected = true
     last = JSON.parse(JSON.stringify(registers))
     loading = 'Reading'
-    connected = true
-    try {
-      registers = await srpc.read_all()
-    } catch {
-      connected = false
-    }
+    try { registers = await srpc.all() }
+    catch { connected = false }
     loading = false
   }
   
@@ -102,7 +99,7 @@
     if (loading || !connected) return
     loading = 'Running'
     try {
-      await srpc.run(code)
+      await srpc.exec(code)
     } catch (e) {
       await Swal.fire('Error', e.toString(), 'error')
     }
@@ -119,7 +116,7 @@
   async function write (r) {
     if (loading || !connected) return
     loading = 'Writing'
-    await srpc.write(r, registers[r])
+    await srpc.reg(r, registers[r])
     loading = false
   }
 
