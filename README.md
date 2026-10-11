@@ -17,19 +17,20 @@ Imagine a processing unit powered by LLM and infinite registers. Each register c
 pip install llmpu
 ```
 
+Configurations:
+
 ```python
 import llmpu
 
 llmpu.config["api_key"] = ""
 
 # full config with default values:
-llmpu.config = {
-    "api_key": "", # llm api key
-    "V": 16, # visible register number
-    "L": 16000, # hard character number limit for register
-    "model": "gemini-flash-latest", # llm model
-    "llm_config": {} # llm config
-}
+llmpu.config["V"] = 16 # visible register number
+llmpu.config["L"] = 16000 # hard character number limit for register
+llmpu.config["model"] = "gemini-flash-latest" # llm model
+llmpu.config["llm_config"] = {} # llm config
+
+# do NOT assign to llmpu.config!
 ```
 
 Register operation:
