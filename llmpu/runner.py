@@ -1,11 +1,9 @@
 import sys
-from .register import read, write
-from .config import config
+from .register import read
 
 # this function is apparently very tricky
 # blame Python for making this so difficult
-
-def _run(c): # share locals and inject globals
+def run(c): # share locals and inject globals
     cf = lambda: sys._getframe(2) # never assign frame to variables to avoid memory leakage
     statically_known = set(cf().f_code.co_varnames + cf().f_code.co_cellvars + cf().f_code.co_freevars)
     merged = cf().f_locals | cf().f_globals
@@ -19,6 +17,3 @@ def _run(c): # share locals and inject globals
     for k in cf().f_globals.keys() - merged.keys():
         del cf().f_globals[k]
 
-def run(c): # isolate scope
-    merged = config["IS"] | {}
-    exec(read(c) if isinstance(c, int) else c, merged, merged)

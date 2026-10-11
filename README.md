@@ -9,7 +9,7 @@ Large Language Model Processing Unit
 
 Imagine a processing unit powered by LLM and infinite registers. Each register can store a string for prompts or codes. There is no fixed prompt. Instead, the contents of the first several registers are presented to the LLM. By generating code, the processing unit will be able to read and write any register, and directly execute the content of any register as Python code. Then the processing unit can be used as a general intelligent computing engine that potentially can improve itself by rewriting some of its own prompts or codes in registers.
 
-The following instruction set is provided to the processing unit as Python functions:
+The following Python functions are used by the processing unit:
 - `read(r)` returns content in register number `r`
 - `write(r, content)` store string `content` in register number `r`
 - `run(r)` execute the content in register number `r` as Python code
@@ -36,31 +36,27 @@ llmpu.config({
     "V": 16, # visible register number
     "L": 16000, # hard character number limit for register
     "model": "gemini-flash-latest", # llm model
-    "llm_config": {}, # llm config
-    "IS": { # instruction set, can be used by llm
-        "read": llmpu.read, "write": llmpu.write, "run": llmpu._run
-    }
+    "llm_config": {} # llm config
 })
 ```
 
-Instruction set functions:
+Register operations:
 
 ```python
-# use register 100 as an example
-llmpu.write(100, "print('hello')") # truncate if exceed config["L"]
-llmpu.read(100) # "print('hello')"
-llmpu.run(100) # execute code in register 100
-# llmpu.run also supports code string
+# use register 0x1A as an example
+llmpu.write(0x1A, "print('hello')") # truncate if exceed config["L"]
+llmpu.read(0x1A) # "print('hello')"
+llmpu.run(0x1A) # execute code in register 0x1A, local variables are shared.
 ```
-
-> Note: `llmpu._run` shares the caller's locals and insert new variables to caller's globals, while `llmpu.run` is isolated.
 
 Control functions:
 
 ```python
 # main cycle: generate instructions
 code = llmpu.cycle()
-llmpu.run(code) # run the code
+llmpu.run(code) # execute instructions
+# it is recommended to create an enclosure to prevent local variable sharing:
+(lambda c: llmpu.run(c))(code)
 
 # core dump
 llmpu.dump("dump.json") # dump registers to a json file

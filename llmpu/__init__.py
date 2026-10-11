@@ -1,15 +1,12 @@
 from .config import config as _config
 from .register import read, read_all, write, dump, load
-from .runner import run, _run
+from .runner import run
 from .llm import request
 from .srpc import srpc
 
 def config(c):
     _config.update(c)
     return _config
-
-# providing default instruction set
-config({ "IS": { "read": read, "write": write, "run": _run } })
 
 def stringify(rs=range(_config["V"])):
     return "\n\n".join(f'<0x{r:X}>\n{read(r)}\n</0x{r:X}>' for r in rs)
@@ -25,7 +22,7 @@ def serve(port=22222, browser=True):
     srpc["write"] = write
     srpc["dump"] = dump
     srpc["load"] = load
-    srpc["run"] = run
+    srpc["run"] = lambda c: run(c) # isolate frame
     srpc["cycle"] = cycle
     if browser:
         import webbrowser
