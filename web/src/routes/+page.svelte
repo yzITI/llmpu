@@ -30,9 +30,9 @@
 
   async function readAll () {
     if (loading) return
+    loading = 'Reading'
     connected = true
     last = JSON.parse(JSON.stringify(registers))
-    loading = 'Reading'
     try { registers = await srpc.read_all() }
     catch { connected = false }
     loading = false
@@ -101,7 +101,6 @@
     } catch (e) {
       await Swal.fire('Error', e.toString(), 'error')
     }
-    loading = false
     readAll()
   }
 
@@ -153,6 +152,14 @@
     }
   })
   console.log('reg is exposed here')
+  
+  window.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) return
+    e.preventDefault()
+    if (e.ctrlKey || e.metaKey) cycle()
+    else if (e.shiftKey) run()
+  })
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
