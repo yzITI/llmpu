@@ -144,11 +144,15 @@
   }
   loop()
 
-  window.write = (r, content) => {
-    registers[r] = content
-    write(r)
-  }
-  console.log('write(r, content) is exposed here')
+  window.reg = new Proxy({}, {
+    get: (_, r) => registers[r] ?? '',
+    set: (_, r, val) => {
+      registers[r] = val
+      write(r)
+      return true
+    }
+  })
+  console.log('reg is exposed here')
 </script>
 
 <div class="w-full h-screen min-w-[768px] flex">
