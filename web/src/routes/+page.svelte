@@ -101,6 +101,7 @@
     } catch (e) {
       await Swal.fire('Error', e.toString(), 'error')
     }
+    loading = false
     readAll()
   }
 
