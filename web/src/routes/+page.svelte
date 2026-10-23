@@ -108,6 +108,7 @@
   async function cycle2run () {
     if (loading || !connected) return
     await cycle()
+    if (!(interval > 0)) return
     await run()
   }
 
