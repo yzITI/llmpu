@@ -209,7 +209,7 @@
         <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
       </div>
     </div>
-    <div class="flex flex-wrap items-start p-4 w-full grow overflow-auto">
+    <div class="flex flex-wrap items-start content-start p-4 w-full grow overflow-auto">
       {#each rs as r}
         <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r } />
       {/each}
