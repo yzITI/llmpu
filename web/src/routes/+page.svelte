@@ -10,6 +10,7 @@
   const LS = window.localStorage, SS = window.sessionStorage
   let url = $state(LS.url || 'http://localhost:22222/')
   let dumpPath = $state(LS.dumpPath || 'dump.json')
+  let V = $state(LS.V || 16)
   let registers = $state({}), last = $state({})
   let newRegister = $state(''), focus = $state(false)
   let content = $state(''), code = $state('')
@@ -18,8 +19,11 @@
   let refs = $state([])
 
   let rs = $derived([...new Set([...Object.keys(registers), ...Object.keys(last)])].map(Number).sort((a, b) => a - b))
+  let rs1 = $derived(rs.filter(r => r < V))
+  let rs2 = $derived(rs.filter(r => r >= V))
   $effect(() => LS.url = url)
   $effect(() => LS.dumpPath = dumpPath)
+  $effect(() => LS.V = V)
 
   async function init () {
     srpc(url)
@@ -192,7 +196,7 @@
         </button>
       </div>
     </div>
-    <div class="px-4 my-3 w-full flex items-center justify-between">
+    <div class="px-4 my-4 w-full flex items-center justify-between">
       <div class="flex items-center">
         <button class="cursor-pointer mr-2 transition-all hover:rotate-90" onclick={readAll} title="refresh">
           <AIcon path={mdiRefresh}></AIcon>
@@ -209,8 +213,18 @@
         <input class="outline-none font-mono border-2 border-white rounded px-2 py-1 block w-24 text-right" placeholder="N/A" bind:value={interval}>
       </div>
     </div>
-    <div class="flex flex-wrap items-start content-start p-4 w-full grow overflow-auto">
-      {#each rs as r}
+    <div class="flex flex-wrap items-start content-start px-4 py-1 w-full overflow-auto">
+      {#each rs1 as r}
+        <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r } />
+      {/each}
+    </div>
+    <div class="flex items-center w-full px-5">
+      <code class="mr-1">V =</code>
+      <input class="outline-none px-1 w-10" bind:value={V}>
+      <hr class="grow border-white">
+    </div>
+    <div class="flex flex-wrap items-start content-start px-4 py-1 w-full grow overflow-auto">
+      {#each rs2 as r}
         <Cell {r} s={s(r)} onclick={() => focus = focus === r ? false : r } />
       {/each}
     </div>
