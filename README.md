@@ -27,7 +27,7 @@ llmpu.config["api_key"] = ""
 # full config with default values:
 llmpu.config["V"] = 16 # visible register number
 llmpu.config["L"] = 16000 # hard character number limit for register
-llmpu.config["model"] = "gemini-flash-latest" # llm model
+llmpu.config["model"] = "gemini-4-hydrogen" # llm model
 llmpu.config["llm_config"] = {} # llm config
 
 # do NOT assign to llmpu.config!
